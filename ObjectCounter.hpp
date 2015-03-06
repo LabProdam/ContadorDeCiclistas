@@ -19,5 +19,6 @@ public:
 	unsigned int GetTotalPoints();		
 	unsigned int GetLTRPoints();
 	unsigned int GetRTLPoints();
+	void SetReferenceBox(cv::Rect referenceBox);
 };
 #endif

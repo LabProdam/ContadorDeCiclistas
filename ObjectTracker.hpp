@@ -19,10 +19,12 @@ private:
 public:
 	ObjectTracker(unsigned int distanceThreshold, double contour_threshold, cv::Rect interest_area);    
 	void IterateTracker(cv::Mat &frame, cv::Mat &fore);
+	void SetInterestArea(cv::Rect interest_area);
 
 private:
 	void CreateNewTracker();    
 	void AddRectanglesToTracker(cv::Mat &frame, cv::Mat &fore);
+	void AddDate(cv::Mat &frame);
 	void PersistImage(cv::Mat &frame);    
 	void AccountNewObjects(cv::Mat &frame);
 	void RenewTrackers();

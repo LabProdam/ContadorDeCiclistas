@@ -5,8 +5,11 @@ ImageProcessor::~ImageProcessor() {}
 	
 cv::Mat ImageProcessor::AcquireForeground(cv::Mat &frame) {
         cv::Mat fore;
+	cv::Mat greyImg;
+	cvtColor( frame, frame, CV_BGR2GRAY );
+	equalizeHist( frame, frame );
         this->bg(frame, fore);
-        cv::dilate(fore, fore, cv::Mat());
+        cv::erode(fore, fore, cv::Mat());
         return fore;
 }
     
@@ -24,7 +27,7 @@ void ImageProcessor::PrepareFrame(cv::Mat &frame,
 		  cv::Point2f p1, 
 		  cv::Point2f p2, 
 		  cv::Point2f p3) {
-    this->RotateImage(frame);
+    //this->RotateImage(frame);
     this->PerspectiveTransform(frame, p0, p1, p2, p3);
     this->CropImage(frame, cropArea);
 }
@@ -32,7 +35,8 @@ void ImageProcessor::PrepareFrame(cv::Mat &frame,
 
 void ImageProcessor::RotateImage(cv::Mat &frame) {
     cv::transpose(frame, frame);
-	    cv::flip(frame, frame, 0);        
+    cv::flip(frame, frame, 0);        
+    cv::flip(frame, frame, 1);        
 }
 
 void ImageProcessor::PerspectiveTransform(cv::Mat &frame, 

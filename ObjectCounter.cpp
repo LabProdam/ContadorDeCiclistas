@@ -18,7 +18,7 @@ bool ObjectCounter::AccountPoint(TrackedObject point) {
 			break;
 		}
 	}
-	if (newElement && point.framesAlive > 3) {				
+	if (newElement && point.framesAlive > 2) {				
 		if (point.pt.x > this->referenceBox.tl().x &&
 			point.pt.x < this->referenceBox.br().x &&
 			point.pt.y > this->referenceBox.tl().y &&
@@ -34,7 +34,7 @@ bool ObjectCounter::AccountPoint(TrackedObject point) {
 			}
 			
 			this->countedPoint[pos++] = point.id;
-			if (pos >= sizeof(countedPoint)/sizeof(unsigned int)) {
+			if (pos >= sizeof(countedPoint)/sizeof(countedPoint[0])) {
 				pos = 0;
 			}
 			
@@ -54,4 +54,8 @@ unsigned int ObjectCounter::GetLTRPoints() {
 
 unsigned int ObjectCounter::GetRTLPoints() {
 	return this->totalRightCount;
+}
+
+void ObjectCounter::SetReferenceBox(cv::Rect referenceBox) {
+	this->referenceBox = referenceBox;
 }

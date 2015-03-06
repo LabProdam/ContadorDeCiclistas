@@ -20,8 +20,8 @@ public:
                       cv::Point2f p2, 
                       cv::Point2f p3);
       
-protected:
     void RotateImage(cv::Mat &frame);
+protected:
     void PerspectiveTransform(cv::Mat &frame, 
                               cv::Point2f p0, 
                               cv::Point2f p1, 
