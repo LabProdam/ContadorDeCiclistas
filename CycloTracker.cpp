@@ -7,6 +7,46 @@
 #include "ImageProcessor.hpp"
 #include "ObjectTracker.hpp"
 
+
+#include <linux/videodev2.h>
+#include <sys/ioctl.h>
+#include <unistd.h>
+#include <stdio.h>  
+#include <stdlib.h>
+#include <string.h>
+#include <fcntl.h>
+
+
+#define VIDEO_DEVICE "/dev/video2"
+#define FRAME_WIDTH  640
+#define FRAME_HEIGHT 480
+#define FRAME_FORMAT V4L2_PIX_FMT_BGR24
+#define FRAME_SIZE 3*FRAME_WIDTH*FRAME_HEIGHT
+#define BYTES_PER_LINE 640//240
+
+void print_format(struct v4l2_format* vid_format) {
+  printf("	vid_format->type                =%d\n",	vid_format->type );
+  printf("	vid_format->fmt.pix.width       =%d\n",	vid_format->fmt.pix.width );
+  printf("	vid_format->fmt.pix.height      =%d\n",	vid_format->fmt.pix.height );
+  printf("	vid_format->fmt.pix.pixelformat =%d\n",	vid_format->fmt.pix.pixelformat);
+  printf("	vid_format->fmt.pix.sizeimage   =%d\n",	vid_format->fmt.pix.sizeimage );
+  printf("	vid_format->fmt.pix.field       =%d\n",	vid_format->fmt.pix.field );
+  printf("	vid_format->fmt.pix.bytesperline=%d\n",	vid_format->fmt.pix.bytesperline );
+  printf("	vid_format->fmt.pix.colorspace  =%d\n",	vid_format->fmt.pix.colorspace );
+}
+
+void format_properties(struct v4l2_format* vid_format){
+	vid_format->type = V4L2_BUF_TYPE_VIDEO_OUTPUT;
+	vid_format->fmt.pix.width = FRAME_WIDTH;
+	vid_format->fmt.pix.height = FRAME_HEIGHT;
+	vid_format->fmt.pix.pixelformat = FRAME_FORMAT;
+	vid_format->fmt.pix.sizeimage = FRAME_SIZE;
+	vid_format->fmt.pix.field = V4L2_FIELD_NONE;
+	vid_format->fmt.pix.bytesperline = BYTES_PER_LINE;
+	vid_format->fmt.pix.colorspace = V4L2_COLORSPACE_SRGB;
+}
+
+
 int x[4];
 int y[4];
 
@@ -138,9 +178,21 @@ void (*InteractionHandler::CurrentCallbackFunction)(int x, int y) = NULL;
 
 
 int main(int argc, char **argv) {
+    int fdwr = 0;
+	int ret_code = 0;
+
+	struct v4l2_capability vid_caps;
+	struct v4l2_format vid_format;
+
+	fdwr = open(VIDEO_DEVICE, O_RDWR);
+
+	format_properties(&vid_format);
+
+	ret_code = ioctl(fdwr, VIDIOC_S_FMT, &vid_format);
+    
     cv::Mat frame;
     cv::Mat fore;
-    cv::VideoCapture cap(1);
+    cv::VideoCapture cap(0);
     
     ImageProcessor ip;   
     
@@ -198,5 +250,10 @@ int main(int argc, char **argv) {
         }
         
         cv::imshow("Faria Lima", frame);
+        cv::resize(frame, frame, cv::Size(FRAME_WIDTH,FRAME_HEIGHT),0,0,CV_INTER_LINEAR );
+        write(fdwr, frame.data, FRAME_SIZE);
     }    
+    
+    close(fdwr);
+	return 0;
 }

@@ -79,11 +79,11 @@ void ObjectTracker::RenewTrackers() {
 void ObjectTracker::PrintCounters(cv::Mat &frame) {
     char id[10];
     sprintf(id, "%02d", object_counter->GetTotalPoints());
-    cv::putText(frame, std::string(id),  cv::Point(2, 30), CV_FONT_HERSHEY_PLAIN, 1, cv::Scalar(0, 0, 0));	
+    cv::putText(frame, std::string(id),  cv::Point(2, 30), CV_FONT_HERSHEY_PLAIN, 1, cv::Scalar(0, 0, 255));	
     
     sprintf(id, ">%02d", object_counter->GetLTRPoints());
-    cv::putText(frame, std::string(id),  cv::Point(2, 45), CV_FONT_HERSHEY_PLAIN, 1, cv::Scalar(0, 0, 0));				
+    cv::putText(frame, std::string(id),  cv::Point(2, 45), CV_FONT_HERSHEY_PLAIN, 1, cv::Scalar(0, 0, 255));				
     
     sprintf(id, "<%02d", object_counter->GetRTLPoints());
-    cv::putText(frame, std::string(id),  cv::Point(2, 60), CV_FONT_HERSHEY_PLAIN, 1, cv::Scalar(0, 0, 0));			   
+    cv::putText(frame, std::string(id),  cv::Point(2, 60), CV_FONT_HERSHEY_PLAIN, 1, cv::Scalar(0, 0, 255));
 }

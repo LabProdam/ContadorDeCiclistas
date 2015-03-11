@@ -6,8 +6,8 @@ ImageProcessor::~ImageProcessor() {}
 cv::Mat ImageProcessor::AcquireForeground(cv::Mat &frame) {
         cv::Mat fore;
 	cv::Mat greyImg;
-	cvtColor( frame, frame, CV_BGR2GRAY );
-	equalizeHist( frame, frame );
+	//cvtColor( frame, frame, CV_BGR2GRAY );
+	//equalizeHist( frame, frame );
         this->bg(frame, fore);
         cv::erode(fore, fore, cv::Mat());
         return fore;
