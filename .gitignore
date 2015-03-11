@@ -1,3 +1,6 @@
 *.swp
 *.o
+*.avi
+*.out
 bin/*
+tmp/*
