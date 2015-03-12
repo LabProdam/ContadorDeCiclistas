@@ -18,7 +18,14 @@ bool ObjectCounter::AccountPoint(TrackedObject point) {
 			break;
 		}
 	}
-	if (newElement && point.framesAlive > 2) {				
+	
+		printf("id: %d, Width: %d, Traj: %f\n", point.id, point.rect.width, fabs(point.pt.x - point.pt0.x) );
+	
+	if (newElement && 
+		point.framesAlive > 2 &&
+		abs(point.pt.x - point.pt0.x) > (1.0 * this->referenceBox.width) &&
+		point.rect.width > (0.7 * this->referenceBox.width) && 				
+		point.rect.width < (1.25 * this->referenceBox.width)) {				
 		if (point.pt.x > this->referenceBox.tl().x &&
 			point.pt.x < this->referenceBox.br().x &&
 			point.pt.y > this->referenceBox.tl().y &&

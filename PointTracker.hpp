@@ -19,7 +19,7 @@ public:
 	
 	PointTracker(unsigned int threshold = 10);	
 	PointTracker(unsigned int threshold, PointTracker reference);	
-	void AddPoint(cv::Point &point);
+	void AddPoint(cv::Point &point, cv::Rect &rectangle);
 };
 
 class RectangleTracker : public PointTracker {

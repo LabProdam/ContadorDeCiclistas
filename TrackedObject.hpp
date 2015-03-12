@@ -6,11 +6,13 @@
 class TrackedObject {
 public:
     cv::Point pt;
-	unsigned int id;
-	unsigned int framesAlive;
-	bool ltr; //Left to right direction
-    
-	TrackedObject();	
-	TrackedObject(cv::Point pt, unsigned int id, bool left2right);
+    cv::Point pt0;
+    cv::Rect rect;
+    unsigned int id;
+    unsigned int framesAlive;
+    bool ltr; //Left to right direction
+
+    TrackedObject();	
+    TrackedObject(cv::Point pt, cv::Rect rectangle,unsigned int id, bool left2right);
 };
 #endif

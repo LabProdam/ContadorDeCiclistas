@@ -8,6 +8,9 @@
 #include "ObjectTracker.hpp"
 #include "VideoOutput.hpp"
 
+#undef STREAM_VIDEO
+#undef SAVE_VIDEO
+
 int x[4];
 int y[4];
 
@@ -144,14 +147,18 @@ int main(int argc, char **argv) {
 
     cv::Mat frame;
     cv::Mat fore;
-    cv::VideoCapture cap(0);
+    cv::VideoCapture cap("out.avi");
+    
+#ifdef STREAM_VIDEO
     VideoOutput outputDevice("/dev/video1");
-	
+#endif	
     ImageProcessor ip;   
     
     cap >> frame;
-    cv::VideoWriter output("out.avi", CV_FOURCC('M', 'P', 'E', 'G'), 30, frame.size());
     cv::Size frame_size = frame.size();
+#ifdef SAVE_VIDEO    
+    cv::VideoWriter output("out.avi", CV_FOURCC('M', 'P', 'E', 'G'), 30, frame_size);
+#endif    
     
     x[0] = 0                ; y[0] = 0;
     x[1] = frame_size.width ; y[1] = 0;
@@ -176,7 +183,7 @@ int main(int argc, char **argv) {
     InteractionHandler::SetAction(InteractionAction::SET_PERSPECTIVE_AREA);
 
     cv::Rect interestArea(x_interest[0], y_interest[0], x_interest[1] - x_interest[0], y_interest[1] - y_interest[0]);
-    ObjectTracker ot(80, 200, interestArea);
+    ObjectTracker ot(30, 50, interestArea);
 
     while(1) {
         cv::Point2f p0(x[0], y[0]);
@@ -189,23 +196,23 @@ int main(int argc, char **argv) {
         ot.SetInterestArea(interestArea);
         
         cap >> frame;
+#ifdef SAVE_VIDEO
         output.write(frame); //Write avi file
+#endif
         ip.PrepareFrame(frame, cropFrame, p0, p1, p2, p3);
         fore = ip.AcquireForeground(frame);
         ip.InsertInterestArea(frame, interestArea);
         cv::imshow("Fore", fore);
         ot.IterateTracker(frame, fore);
-        
-        /*if(cv::waitKey(30)  == 32) {
-            imageNum++;
-            char fileName[20];
-            sprintf(fileName, "tmp/cap%02d.jpg", imageNum);
-            cv::imwrite(fileName, frame );
-        }*/
-        
+              
         cv::imshow("Faria Lima", frame);
+#ifdef STREAM_VIDEO        
 		outputDevice.write(frame);
+#endif
+        if(cv::waitKey(30)  == 27) {
+            break;
+        }
     }    
-
+    
 	return 0;
 }
