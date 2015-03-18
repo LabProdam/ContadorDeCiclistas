@@ -8,8 +8,11 @@
 #include "ObjectTracker.hpp"
 #include "VideoOutput.hpp"
 
-#undef STREAM_VIDEO
-#undef SAVE_VIDEO
+#define STREAM_VIDEO
+#define SAVE_VIDEO
+
+int x_counter[2];
+int y_counter[2];
 
 int x[4];
 int y[4];
@@ -21,11 +24,32 @@ int x_interest[2];
 int y_interest[2];
 
 enum InteractionAction {
+        SET_COUNTERS_AREA,
         SET_PERSPECTIVE_AREA,
         SET_CROP_AREA,
         SET_INTEREST_AREA,
         NONE
 };
+
+void ProvidePip(cv::Mat &frame, cv::Mat &fore, cv::Mat &dst) {
+	cv::Size pip1Size(std::min(400, frame.size().width), std::min(200, frame.size().height));
+	cv::Rect pip1Rect(cv::Point(dst.size().width - pip1Size.width - 20, 20), pip1Size);
+	cv::Mat pip1;
+	cv::resize(frame, pip1, pip1Size);
+
+	cv::rectangle(dst, pip1Rect, cv::Scalar(0, 0, 255), 5);
+	pip1.copyTo(dst(pip1Rect));
+
+	/*cv::Size pip2Size(std::min(300, fore.size().width), std::min(150, fore.size().height));
+	cv::Mat rgbFore(fore.size(), CV_8UC3);
+	int from_to[]= {0,0, 0,1, 0,2};
+	cv::mixChannels(&fore, fore.channels(), &rgbFore, fore.channels(), from_to, 3);
+	cv::Rect pip2Rect(cv::Point(20, 122), pip2Size);
+	cv::Mat pip2;
+	cv::resize(rgbFore, pip2, pip2Size);
+
+	pip2.copyTo(dst(pip2Rect));*/
+}
 
 class InteractionHandler {
 private:
@@ -37,6 +61,9 @@ public:
 
         static void SetAction(InteractionAction action) {
             switch (action) {
+		case SET_COUNTERS_AREA:
+                    CurrentCallbackFunction = GetCountersArea;
+		break;
                 case SET_PERSPECTIVE_AREA:
                     CurrentCallbackFunction = GetPerspectivePoints;
                 break;
@@ -61,7 +88,30 @@ protected:
                             break;
                     }
             }
-        }       
+        }      
+ 
+        static void GetCountersArea(int x, int y) {
+            static int step = 0;
+            static int x_internal[2];
+            static int y_internal[2];
+            x_internal[step] = x;
+            y_internal[step] = y;
+            switch (step) {
+                case 0:
+                    printf("Ponto %d %d\nSelecione Ponto de Contador a Direita\n");
+                    break;
+                case 1:              
+                    step = 0;
+                    for (int i = 0; i < sizeof(::x_counter)/sizeof(::x_counter[0]); i++) {
+                            ::x_counter[i] = x_internal[i];
+                            ::y_counter[i] = y_internal[i];
+                    }
+                    printf("Selecione Ponto de Perspectiva Inicial\n");
+                    InteractionHandler::SetAction(InteractionAction::SET_PERSPECTIVE_AREA);
+                    return;                    
+            }
+            step++;
+        }
                 
         static void GetPerspectivePoints(int x, int y) {
             static int step = 0;
@@ -140,14 +190,14 @@ protected:
 
 void (*InteractionHandler::CurrentCallbackFunction)(int x, int y) = NULL;
 
-
 int main(int argc, char **argv) {
     int fdwr = 0;
-	int ret_code = 0;
+    int ret_code = 0;
 
     cv::Mat frame;
     cv::Mat fore;
-    cv::VideoCapture cap("out.avi");
+    cv::Mat full;
+    cv::VideoCapture cap(0);
     
 #ifdef STREAM_VIDEO
     VideoOutput outputDevice("/dev/video1");
@@ -159,12 +209,14 @@ int main(int argc, char **argv) {
 #ifdef SAVE_VIDEO    
     cv::VideoWriter output("out.avi", CV_FOURCC('M', 'P', 'E', 'G'), 30, frame_size);
 #endif    
+    memset(x_counter, 0, sizeof(x_counter));
+    memset(y_counter, 0, sizeof(y_counter));
     
     x[0] = 0                ; y[0] = 0;
     x[1] = frame_size.width ; y[1] = 0;
     x[2] = 0                ; y[2] = frame_size.height;
     x[3] = frame_size.width ; y[3] = frame_size.height;
-    
+   
     x_crop[0] = 0                 ; y_crop[0] = 0;
     x_crop[1] = frame_size.width  ; y_crop[1] = frame_size.height;
     
@@ -179,13 +231,16 @@ int main(int argc, char **argv) {
     cv::imshow("Faria Lima", frame);    
     InteractionHandler::Subscribe("Faria Lima");
     
-    printf("Selecione Ponto de Perspectiva Inicial\n");
-    InteractionHandler::SetAction(InteractionAction::SET_PERSPECTIVE_AREA);
+    printf("Selecione Ponto de Contador a Esquerda\n");
+    InteractionHandler::SetAction(InteractionAction::SET_COUNTERS_AREA);
 
     cv::Rect interestArea(x_interest[0], y_interest[0], x_interest[1] - x_interest[0], y_interest[1] - y_interest[0]);
     ObjectTracker ot(30, 50, interestArea);
 
     while(1) {
+	cv::Point lCounter(x_counter[0], y_counter[0]);
+	cv::Point rCounter(x_counter[1], y_counter[1]);
+
         cv::Point2f p0(x[0], y[0]);
         cv::Point2f p1(x[1], y[1]);
         cv::Point2f p2(x[2], y[2]);
@@ -196,18 +251,25 @@ int main(int argc, char **argv) {
         ot.SetInterestArea(interestArea);
         
         cap >> frame;
+	full = frame.clone();
 #ifdef SAVE_VIDEO
         output.write(frame); //Write avi file
 #endif
         ip.PrepareFrame(frame, cropFrame, p0, p1, p2, p3);
         fore = ip.AcquireForeground(frame);
         ip.InsertInterestArea(frame, interestArea);
-        cv::imshow("Fore", fore);
+        //cv::imshow("Fore", fore);
         ot.IterateTracker(frame, fore);
+	ot.PrintTotal(full);
+	ot.PrintLeftPartial(full, lCounter);
+	ot.PrintRightPartial(full, rCounter);
               
         cv::imshow("Faria Lima", frame);
+	
+	ProvidePip(frame, fore, full);
+        cv::imshow("Full Frame", full);
 #ifdef STREAM_VIDEO        
-		outputDevice.write(frame);
+	outputDevice.write(full);
 #endif
         if(cv::waitKey(30)  == 27) {
             break;

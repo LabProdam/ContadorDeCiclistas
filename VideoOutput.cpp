@@ -9,17 +9,18 @@
 #include <string.h>
 #include <fcntl.h>
 
-VideoOutput::VideoOutput(const char *outputevice) {
+VideoOutput::VideoOutput(const char *outputDevice) {
 	unsigned int outputSize = strlen(outputDevice);
 	this->outputDevice = new char[outputSize];
 	sprintf(this->outputDevice, "%s", outputDevice);
+	printf("File: %s", this->outputDevice);
 	
-	this->fdrw = open(outputDevice, O_RDWR);
+	this->fdrw = open(this->outputDevice, O_RDWR);
 	assert(this->fdrw >= 0);
 	
 	this->format_properties(&(this->vid_format));
 	int ret_code = ioctl(this->fdrw, VIDIOC_S_FMT, &vid_format);
-	assert(ret_code >=0);
+	assert(ret_code >= 0);
 }
 		
 VideoOutput::~VideoOutput() {

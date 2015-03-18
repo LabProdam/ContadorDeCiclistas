@@ -41,9 +41,16 @@ void ObjectTracker::AddRectanglesToTracker(cv::Mat &frame, cv::Mat &fore) {
 void ObjectTracker::AddDate(cv::Mat &frame) {
     time_t time_now = time(0);
     char buff[50];
+    int yPos = 15;
 	    
-    strftime(buff, sizeof(buff), "%Y-%m-%d.%X", localtime(&time_now));
-    cv::putText(frame, std::string(buff), cv::Point(2, 15), CV_FONT_HERSHEY_PLAIN, 1, cv::Scalar(0, 0, 255));
+    strftime(buff, sizeof(buff), "%d/%m/%Y", localtime(&time_now));
+    cv::putText(frame, std::string(buff), cv::Point(2, yPos), CV_FONT_HERSHEY_PLAIN, 1, cv::Scalar(255, 255, 255), 2, CV_AA);
+    cv::putText(frame, std::string(buff), cv::Point(2, yPos), CV_FONT_HERSHEY_PLAIN, 1, cv::Scalar(0, 0, 0), 1, CV_AA);
+
+    strftime(buff, sizeof(buff), "%X", localtime(&time_now));
+    cv::Size sz = cv::getTextSize(std::string(buff), CV_FONT_HERSHEY_PLAIN, 1, 2, NULL);
+    cv::putText(frame, std::string(buff), cv::Point(frame.size().width - sz.width - 2, yPos), CV_FONT_HERSHEY_PLAIN, 1, cv::Scalar(255, 255, 255), 2, CV_AA);
+    cv::putText(frame, std::string(buff), cv::Point(frame.size().width - sz.width - 2, yPos), CV_FONT_HERSHEY_PLAIN, 1, cv::Scalar(0, 0, 0), 1, CV_AA);
 }
 
 void ObjectTracker::PersistImage(cv::Mat &frame) {
@@ -78,12 +85,37 @@ void ObjectTracker::RenewTrackers() {
 
 void ObjectTracker::PrintCounters(cv::Mat &frame) {
     char id[10];
-    sprintf(id, "%02d", object_counter->GetTotalPoints());
-    cv::putText(frame, std::string(id),  cv::Point(2, 30), CV_FONT_HERSHEY_PLAIN, 1, cv::Scalar(0, 0, 255));	
+    sprintf(id, "Total: %02d", object_counter->GetTotalPoints());
+    cv::putText(frame, std::string(id),  cv::Point(2, 30), CV_FONT_HERSHEY_PLAIN, 1, cv::Scalar(255, 255, 255), 2, CV_AA);
+    cv::putText(frame, std::string(id),  cv::Point(2, 30), CV_FONT_HERSHEY_PLAIN, 1, cv::Scalar(0, 0, 0), 1, CV_AA);	
     
     sprintf(id, ">%02d", object_counter->GetLTRPoints());
-    cv::putText(frame, std::string(id),  cv::Point(2, 45), CV_FONT_HERSHEY_PLAIN, 1, cv::Scalar(0, 0, 255));				
+    cv::putText(frame, std::string(id),  cv::Point(2, 60), CV_FONT_HERSHEY_PLAIN, 1, cv::Scalar(255, 255, 255), 2, CV_AA);
+    cv::putText(frame, std::string(id),  cv::Point(2, 60), CV_FONT_HERSHEY_PLAIN, 1, cv::Scalar(0, 0, 0), 1, CV_AA);
     
     sprintf(id, "<%02d", object_counter->GetRTLPoints());
-    cv::putText(frame, std::string(id),  cv::Point(2, 60), CV_FONT_HERSHEY_PLAIN, 1, cv::Scalar(0, 0, 255));
+    cv::putText(frame, std::string(id),  cv::Point(2, 45), CV_FONT_HERSHEY_PLAIN, 1, cv::Scalar(255, 255, 255), 2, CV_AA);
+    cv::putText(frame, std::string(id),  cv::Point(2, 45), CV_FONT_HERSHEY_PLAIN, 1, cv::Scalar(0, 0, 0), 1, CV_AA);
+}
+
+void ObjectTracker::PrintTotal(cv::Mat &frame) {
+    char id[10];
+    cv::Point pt(10, 50);
+    sprintf(id, "Total: %02d", object_counter->GetTotalPoints());
+    cv::putText(frame, std::string(id),  pt, CV_FONT_HERSHEY_PLAIN, 3, cv::Scalar(0, 0, 0), 5, CV_AA);
+    cv::putText(frame, std::string(id),  pt, CV_FONT_HERSHEY_PLAIN, 3, cv::Scalar(0, 255, 255), 3, CV_AA);
+}
+
+void ObjectTracker::PrintRightPartial(cv::Mat &frame, cv::Point pt) {
+    char id[10];
+    sprintf(id, ">%02d", object_counter->GetLTRPoints());
+    cv::putText(frame, std::string(id),  pt, CV_FONT_HERSHEY_PLAIN, 3, cv::Scalar(0, 0, 0), 5, CV_AA);
+    cv::putText(frame, std::string(id),  pt, CV_FONT_HERSHEY_PLAIN, 3, cv::Scalar(0, 255, 255), 3, CV_AA);
+}
+
+void ObjectTracker::PrintLeftPartial(cv::Mat &frame, cv::Point pt) {
+    char id[10];
+    sprintf(id, "<%02d", object_counter->GetRTLPoints());
+    cv::putText(frame, std::string(id),  pt, CV_FONT_HERSHEY_PLAIN, 3, cv::Scalar(0, 0, 0), 5, CV_AA);
+    cv::putText(frame, std::string(id),  pt, CV_FONT_HERSHEY_PLAIN, 3, cv::Scalar(0, 255, 255), 3, CV_AA);
 }
