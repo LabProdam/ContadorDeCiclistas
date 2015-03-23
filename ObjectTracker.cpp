@@ -84,7 +84,7 @@ void ObjectTracker::RenewTrackers() {
 }
 
 void ObjectTracker::PrintCounters(cv::Mat &frame) {
-    char id[10];
+    char id[20];
     sprintf(id, "Total: %02d", object_counter->GetTotalPoints());
     cv::putText(frame, std::string(id),  cv::Point(2, 30), CV_FONT_HERSHEY_PLAIN, 1, cv::Scalar(255, 255, 255), 2, CV_AA);
     cv::putText(frame, std::string(id),  cv::Point(2, 30), CV_FONT_HERSHEY_PLAIN, 1, cv::Scalar(0, 0, 0), 1, CV_AA);	
@@ -99,7 +99,7 @@ void ObjectTracker::PrintCounters(cv::Mat &frame) {
 }
 
 void ObjectTracker::PrintTotal(cv::Mat &frame) {
-    char id[10];
+    char id[20];
     cv::Point pt(10, 50);
     sprintf(id, "Total: %02d", object_counter->GetTotalPoints());
     cv::putText(frame, std::string(id),  pt, CV_FONT_HERSHEY_PLAIN, 3, cv::Scalar(0, 0, 0), 5, CV_AA);

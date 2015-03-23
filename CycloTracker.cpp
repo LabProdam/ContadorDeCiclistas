@@ -4,12 +4,18 @@
 #include<vector>
 #include<map>
 
+#define SENSORS
+#define STREAM_VIDEO
+#define SAVE_VIDEO
+
 #include "ImageProcessor.hpp"
 #include "ObjectTracker.hpp"
 #include "VideoOutput.hpp"
 
-#define STREAM_VIDEO
-#define SAVE_VIDEO
+#ifdef SENSORS
+#include "Sensors.hpp"
+#endif
+
 
 int x_counter[2];
 int y_counter[2];
@@ -32,6 +38,7 @@ enum InteractionAction {
 };
 
 void ProvidePip(cv::Mat &frame, cv::Mat &fore, cv::Mat &dst) {
+
 	cv::Size pip1Size(std::min(400, frame.size().width), std::min(200, frame.size().height));
 	cv::Rect pip1Rect(cv::Point(dst.size().width - pip1Size.width - 20, 20), pip1Size);
 	cv::Mat pip1;
@@ -49,6 +56,20 @@ void ProvidePip(cv::Mat &frame, cv::Mat &fore, cv::Mat &dst) {
 	cv::resize(rgbFore, pip2, pip2Size);
 
 	pip2.copyTo(dst(pip2Rect));*/
+
+	//Add bike to image
+	/*cv::Mat cyclistImage = cv::imread("cyclist.png", CV_LOAD_IMAGE_UNCHANGED);
+	cyclistImage.data[cyclistImage.step* 0 + 0 + 0] = 0xFF;
+	cyclistImage.data[cyclistImage.step* 0 + 0 + 1] = 0xFF;
+	cyclistImage.data[cyclistImage.step* 0 + 0 + 2] = 0xFF;
+	cv::imshow("Mini", cyclistImage);
+
+/*	cv::Mat rgbBg(rgbaBg.rows, rgbaBg.cols, CV_8UC3);
+	cv::mixChannels(&rgbaBg, 2, &rgbBg, 1, from_to, 3);
+	rgbBg.copyTo(dst(imageRect));*/
+
+
+//	cyclistImage.copyTo(dst(imageRect));
 }
 
 class InteractionHandler {
@@ -237,6 +258,11 @@ int main(int argc, char **argv) {
     cv::Rect interestArea(x_interest[0], y_interest[0], x_interest[1] - x_interest[0], y_interest[1] - y_interest[0]);
     ObjectTracker ot(30, 50, interestArea);
 
+
+#ifdef SENSORS
+    SensorData sd;
+    std::thread *sensorsThread = StartSensorsThread("/dev/ttyACM0", &sd);
+#endif
     while(1) {
 	cv::Point lCounter(x_counter[0], y_counter[0]);
 	cv::Point rCounter(x_counter[1], y_counter[1]);
@@ -267,14 +293,39 @@ int main(int argc, char **argv) {
         cv::imshow("Faria Lima", frame);
 	
 	ProvidePip(frame, fore, full);
+
+#ifdef SENSORS
+   	char id[20];
+	cv::Point ptu(full.size().width-170, full.size().height-50);
+	sprintf(id, "Umidade: %s%%", sd.umidity.c_str());
+  	cv::putText(full, std::string(id),  ptu, CV_FONT_HERSHEY_PLAIN, 1, cv::Scalar(0, 0, 0), 2, CV_AA);
+	cv::putText(full, std::string(id),  ptu, CV_FONT_HERSHEY_PLAIN, 1, cv::Scalar(0, 255, 255), 1, CV_AA);
+
+	sprintf(id, "Temperatura: %s C", sd.temperature.c_str());
+	cv::Point ptt(full.size().width-170, full.size().height-30);
+  	cv::putText(full, std::string(id),  ptt, CV_FONT_HERSHEY_PLAIN, 1, cv::Scalar(0, 0, 0), 2, CV_AA);
+	cv::putText(full, std::string(id),  ptt, CV_FONT_HERSHEY_PLAIN, 1, cv::Scalar(0, 255, 255), 1, CV_AA);
+
+	sprintf(id, "Temperatura: %s", sd.temperature.c_str());
+	cv::Size sz = cv::getTextSize(id, CV_FONT_HERSHEY_PLAIN, 1, 2, NULL);
+	cv::Point ptg(full.size().width - 172 + sz.width, full.size().height-30 - (sz.height/2));
+	sprintf(id, "o", sd.temperature.c_str());
+  	cv::putText(full, std::string(id),  ptg, CV_FONT_HERSHEY_PLAIN, 1, cv::Scalar(0, 0, 0), 2, CV_AA);
+	cv::putText(full, std::string(id),  ptg, CV_FONT_HERSHEY_PLAIN, 1, cv::Scalar(0, 255, 255), 1, CV_AA);      
+
+#endif
         cv::imshow("Full Frame", full);
+
+
+
 #ifdef STREAM_VIDEO        
 	outputDevice.write(full);
 #endif
         if(cv::waitKey(30)  == 27) {
             break;
         }
-    }    
+    }
     
-	return 0;
+    sensorsThread->join();
+    return 0;
 }
