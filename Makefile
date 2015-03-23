@@ -4,7 +4,9 @@ clean:
 	rm -f bin/*
 	rm -f *.o
 
-bin/CycloTracker: CycloTracker.cpp VideoOutput.o ImageProcessor.o ObjectCounter.o ObjectLocator.o ObjectTracker.o PointTracker.o TrackedObject.o
+bin/CycloTracker: CycloTracker.cpp VideoOutput.o ImageProcessor.o ObjectCounter.o ObjectLocator.o ObjectTracker.o PointTracker.o TrackedObject.o Sensors.o
+	mkdir -p bin
+	mkdir -p tmp
 	g++ $^ -o $@ `pkg-config --libs opencv` --std=c++11
 
 VideoOutput.o: VideoOutput.cpp VideoOutput.hpp
@@ -27,3 +29,6 @@ PointTracker.o: PointTracker.cpp PointTracker.hpp TrackedObject.hpp
 
 TrackedObject.o: TrackedObject.cpp TrackedObject.hpp
 	g++ $< -c -o $@ --std=c++11
+
+Sensors.o: Sensors.cpp Sensors.hpp
+	g++ $< -c -o $@ --std=c++11 -pthread
