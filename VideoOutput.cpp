@@ -8,18 +8,32 @@
 #include <stdlib.h>
 #include <string.h>
 #include <fcntl.h>
+#include <errno.h>
 
-VideoOutput::VideoOutput(const char *outputevice) {
+VideoOutput::VideoOutput(const char *outputDevice) {
 	unsigned int outputSize = strlen(outputDevice);
 	this->outputDevice = new char[outputSize];
 	sprintf(this->outputDevice, "%s", outputDevice);
+	printf("File: %s", this->outputDevice);
 	
-	this->fdrw = open(outputDevice, O_RDWR);
-	assert(this->fdrw >= 0);
+	if( (this->fdrw = open(this->outputDevice, O_RDWR)) < 0)
+	{
+		perror("The following error occurred");
+		std::cout << std::endl;
+		exit(EXIT_FAILURE);
+	}
 	
 	this->format_properties(&(this->vid_format));
-	int ret_code = ioctl(this->fdrw, VIDIOC_S_FMT, &vid_format);
-	assert(ret_code >=0);
+	if( ioctl(this->fdrw, VIDIOC_S_FMT, &vid_format) < 0)
+	{
+		int errno2 = errno;
+		perror("The following error occurred");
+		std::cout << std::endl;
+		if(errno2 == ENOTTY)
+			std::cout << "Probably " << outputDevice << " is not " <<
+			"a video streaming device." << std::endl;
+		exit(EXIT_FAILURE);
+	}
 }
 		
 VideoOutput::~VideoOutput() {

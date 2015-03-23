@@ -1,7 +1,6 @@
 #include <opencv2/opencv.hpp>
 #include <linux/videodev2.h>
 
-#define VIDEO_DEVICE "/dev/video2"
 #define FRAME_WIDTH  640
 #define FRAME_HEIGHT 480
 #define FRAME_FORMAT V4L2_PIX_FMT_BGR24

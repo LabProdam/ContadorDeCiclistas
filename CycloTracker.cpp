@@ -3,13 +3,11 @@
 #include<iostream>
 #include<vector>
 #include<map>
+#include<getopt.h>
 
 #include "ImageProcessor.hpp"
 #include "ObjectTracker.hpp"
 #include "VideoOutput.hpp"
-
-#undef STREAM_VIDEO
-#undef SAVE_VIDEO
 
 int x[4];
 int y[4];
@@ -141,24 +139,119 @@ protected:
 void (*InteractionHandler::CurrentCallbackFunction)(int x, int y) = NULL;
 
 
+static void print_usage(std::string program_name) {
+	std::cout << program_name << " usage:" << std::endl <<
+		"\t--help   (-h): print this message." << std::endl <<
+		"\t--source (-s) <file_name>: Specify where data comes from." <<
+		std::endl <<
+		"\t--record (-r) <file_name>: Record video to filename." <<
+		std::endl <<
+		"\t--stream (-S) <device>: Streams video via device." <<
+		std::endl <<
+		"\t--address (-a) <address>: address must be present and must be in " <<
+		"in this format: street-number. --address faria_lima-1200." <<
+		std::endl;
+	return;
+}
+
 int main(int argc, char **argv) {
+
+	static struct option long_options[] = {
+		{ "source",    required_argument, NULL, 's'},
+		{ "record",    required_argument, NULL, 'r'},
+		{ "stream",    required_argument, NULL, 'S'},
+		{ "address",   required_argument, NULL, 'a'},
+		{ "help",      no_argument, NULL, 'h'},
+		{ 0,        0,                 0,    0}
+	};
+	int opt = 0;
+	int long_index = 0;
+	
+	std::string source_file   = ""; //where data comes from
+	std::string record_file   = ""; //output file
+	std::string stream_device = ""; //device file used to stream data
+	std::string address       = ""; //address where program is running on.
+	bool help = false;
+	bool abort = false;
+
+	while((opt = getopt_long(argc, argv, "s:r:S:h", long_options, &long_index))
+			!= -1) {
+		switch(opt) {
+			case 's':
+				source_file = optarg;
+				break;
+			case 'r':
+				record_file = optarg;
+				break;
+			case 'S':
+				stream_device = optarg;
+				break;
+			case 'a':
+				address = optarg;
+				break;
+			case 'h':
+				help = true;
+				break;
+			default:
+				return EXIT_FAILURE;
+				break;
+		}
+	}
+
+	if(help) {
+		print_usage((std::string) argv[0]);
+		return EXIT_SUCCESS;
+	}
+
+	if(address.empty()) {
+		std::cout << "You must specify your address. "
+			<< "Like --address faria_lima-1280." << std::endl;
+		abort = true;
+
+	}
+
+	if(source_file.empty()) {
+		std::cout << "You must specify where data comes from." << std::endl <<
+			"\tUse --source <source_file>. Or --help to print usage." <<
+			std::endl;
+		abort = true;
+	}
+
+	if( (source_file == record_file)   ||
+		(source_file == stream_device) ||
+		((record_file == stream_device) && !record_file.empty())
+		) {
+		std::cout << "Files must not be the same." << std::endl;
+		abort = true;
+	}
+
+	if(abort)
+		return EXIT_FAILURE;
+
     int fdwr = 0;
 	int ret_code = 0;
+	const char *c = NULL;
+	cv::VideoWriter *output;
+	VideoOutput *outputDevice;
 
     cv::Mat frame;
     cv::Mat fore;
-    cv::VideoCapture cap("out.avi");
+    cv::VideoCapture cap(source_file);
     
-#ifdef STREAM_VIDEO
-    VideoOutput outputDevice("/dev/video1");
-#endif	
+	if(!stream_device.empty()) {
+		c = stream_device.c_str();
+	    outputDevice = new VideoOutput(c);
+	}
+
     ImageProcessor ip;   
     
     cap >> frame;
     cv::Size frame_size = frame.size();
-#ifdef SAVE_VIDEO    
-    cv::VideoWriter output("out.avi", CV_FOURCC('M', 'P', 'E', 'G'), 30, frame_size);
-#endif    
+
+	if(!record_file.empty())
+	    output = new cv::VideoWriter(record_file, CV_FOURCC('M', 'P', 'E', 'G'), 30, frame_size);
+
+
     
     x[0] = 0                ; y[0] = 0;
     x[1] = frame_size.width ; y[1] = 0;
@@ -176,8 +269,8 @@ int main(int argc, char **argv) {
     
     int imageNum = 0;
     
-    cv::imshow("Faria Lima", frame);    
-    InteractionHandler::Subscribe("Faria Lima");
+    cv::imshow(address, frame);    
+    InteractionHandler::Subscribe(address);
     
     printf("Selecione Ponto de Perspectiva Inicial\n");
     InteractionHandler::SetAction(InteractionAction::SET_PERSPECTIVE_AREA);
@@ -196,23 +289,21 @@ int main(int argc, char **argv) {
         ot.SetInterestArea(interestArea);
         
         cap >> frame;
-#ifdef SAVE_VIDEO
-        output.write(frame); //Write avi file
-#endif
+		if(!record_file.empty())
+			output->write(frame); //Write avi file
         ip.PrepareFrame(frame, cropFrame, p0, p1, p2, p3);
         fore = ip.AcquireForeground(frame);
         ip.InsertInterestArea(frame, interestArea);
         cv::imshow("Fore", fore);
         ot.IterateTracker(frame, fore);
               
-        cv::imshow("Faria Lima", frame);
-#ifdef STREAM_VIDEO        
-		outputDevice.write(frame);
-#endif
-        if(cv::waitKey(30)  == 27) {
+        cv::imshow(address, frame);
+		if(!stream_device.empty())
+			outputDevice->write(frame);
+
+        if(cv::waitKey(30) == 27)
             break;
-        }
-    }    
+    }
     
 	return 0;
 }
