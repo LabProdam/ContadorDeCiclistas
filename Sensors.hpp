@@ -7,6 +7,8 @@
 typedef struct {
 	std::string umidity;
 	std::string temperature;
+	std::string pressure;
+	std::string co;
 }SensorData;
 
 

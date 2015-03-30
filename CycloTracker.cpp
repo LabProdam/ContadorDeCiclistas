@@ -300,15 +300,15 @@ int main(int argc, char **argv) {
 		return EXIT_FAILURE;
 
     int fdwr = 0;
-	int ret_code = 0;
-	const char *c = NULL;
-	cv::VideoWriter *output;
-	VideoOutput *outputDevice;
+    int ret_code = 0;
+    const char *c = NULL;
+    cv::VideoWriter *output;
+    VideoOutput *outputDevice;
 
     cv::Mat frame;
     cv::Mat full;
     cv::Mat fore;
-    cv::VideoCapture cap(source_file);
+    cv::VideoCapture cap(0);
     
 	if(!stream_device.empty()) {
 		c = stream_device.c_str();
@@ -337,11 +337,7 @@ int main(int argc, char **argv) {
     x_interest[0] = 0; y_interest[0] = 0;
     x_interest[1] = 1; y_interest[1] = 1;
     
-    //cap >> frame;
-    //cv::imwrite( "tmp/fram0.jpg", frame );
-    
-    int imageNum = 0;
-    
+    int imageNum = 0;    
     cv::imshow(address, frame);    
     InteractionHandler::Subscribe(address);
     
@@ -386,6 +382,16 @@ int main(int argc, char **argv) {
 
 #ifdef SENSORS
 		char id[20];
+		sprintf(id, "CO: %s", sd.co.c_str());
+		cv::Point ptc(full.size().width-170, full.size().height-90);
+		cv::putText(full, std::string(id),  ptc, CV_FONT_HERSHEY_PLAIN, 1, cv::Scalar(0, 0, 0), 2, CV_AA);
+		cv::putText(full, std::string(id),  ptc, CV_FONT_HERSHEY_PLAIN, 1, cv::Scalar(0, 255, 255), 1, CV_AA);
+
+		sprintf(id, "Pressao: %s Pa", sd.pressure.c_str());
+		cv::Point ptp(full.size().width-170, full.size().height-70);
+		cv::putText(full, std::string(id),  ptp, CV_FONT_HERSHEY_PLAIN, 1, cv::Scalar(0, 0, 0), 2, CV_AA);
+		cv::putText(full, std::string(id),  ptp, CV_FONT_HERSHEY_PLAIN, 1, cv::Scalar(0, 255, 255), 1, CV_AA);
+
 		cv::Point ptu(full.size().width-170, full.size().height-50);
 		sprintf(id, "Umidade: %s%%", sd.umidity.c_str());
 		cv::putText(full, std::string(id),  ptu, CV_FONT_HERSHEY_PLAIN, 1, cv::Scalar(0, 0, 0), 2, CV_AA);
