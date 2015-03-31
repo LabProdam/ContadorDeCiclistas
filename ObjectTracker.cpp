@@ -68,7 +68,7 @@ void ObjectTracker::AccountNewObjects(cv::Mat &frame) {
 		this->PersistImage(frame);
 	    }
 	    //TODO
-	    char id[5];
+	    char id[11];
 	    sprintf(id, "%02d", rectCenter.id);
 	    cv::putText(frame, std::string(id),  rectCenter.pt, CV_FONT_HERSHEY_PLAIN, 1, cv::Scalar(0, 255, 0));
 	}
