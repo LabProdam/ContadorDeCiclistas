@@ -300,15 +300,15 @@ int main(int argc, char **argv) {
 		return EXIT_FAILURE;
 
     int fdwr = 0;
-    int ret_code = 0;
-    const char *c = NULL;
-    cv::VideoWriter *output;
-    VideoOutput *outputDevice;
+	int ret_code = 0;
+	const char *c = NULL;
+	cv::VideoWriter *output;
+	VideoOutput *outputDevice;
 
     cv::Mat frame;
     cv::Mat full;
     cv::Mat fore;
-    cv::VideoCapture cap(0);
+    cv::VideoCapture cap(source_file);
     
 	if(!stream_device.empty()) {
 		c = stream_device.c_str();
@@ -337,7 +337,8 @@ int main(int argc, char **argv) {
     x_interest[0] = 0; y_interest[0] = 0;
     x_interest[1] = 1; y_interest[1] = 1;
     
-    int imageNum = 0;    
+    int imageNum = 0;
+    
     cv::imshow(address, frame);    
     InteractionHandler::Subscribe(address);
     
