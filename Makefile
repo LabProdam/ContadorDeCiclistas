@@ -1,34 +1,30 @@
+OBJ=CycloTracker.o \
+	VideoOutput.o \
+	ImageProcessor.o \
+	ObjectCounter.o \
+	ObjectLocator.o \
+	ObjectTracker.o \
+	PointTracker.o \
+	TrackedObject.o \
+	Sensors.o \
+	Camera.o \
+	CoordTransform.o
+
+CFLAGS=-Wall \
+	   -Wextra \
+	   -O2
+
 all:bin/CycloTracker
 
 clean:
 	rm -f bin/*
-	rm -f *.o
+	rm -f $(OBJ)
 
-bin/CycloTracker: CycloTracker.cpp VideoOutput.o ImageProcessor.o ObjectCounter.o ObjectLocator.o ObjectTracker.o PointTracker.o TrackedObject.o Sensors.o
-	mkdir -p bin
-	mkdir -p tmp
+bin/CycloTracker: $(OBJ)
+	@mkdir -p bin
+	@mkdir -p tmp
 	g++ $^ -o $@ `pkg-config --libs opencv` --std=c++11
 
-VideoOutput.o: VideoOutput.cpp VideoOutput.hpp
-	g++ $< -c -o $@ --std=c++11
+%.o: %.cpp
+	g++ -c $< -o $@ --std=c++11
 
-ImageProcessor.o: ImageProcessor.cpp ImageProcessor.hpp 
-	g++ $< -c -o $@ --std=c++11
-
-ObjectCounter.o: ObjectCounter.cpp ObjectCounter.hpp TrackedObject.hpp
-	g++ $< -c -o $@ --std=c++11
-
-ObjectLocator.o: ObjectLocator.cpp ObjectCounter.hpp
-	g++ $< -c -o $@ --std=c++11
-
-ObjectTracker.o: ObjectTracker.cpp ObjectTracker.hpp TrackedObject.hpp ObjectCounter.hpp ObjectLocator.hpp PointTracker.hpp
-	g++ $< -c -o $@ --std=c++11
-
-PointTracker.o: PointTracker.cpp PointTracker.hpp TrackedObject.hpp
-	g++ $< -c -o $@ --std=c++11
-
-TrackedObject.o: TrackedObject.cpp TrackedObject.hpp
-	g++ $< -c -o $@ --std=c++11
-
-Sensors.o: Sensors.cpp Sensors.hpp
-	g++ $< -c -o $@ --std=c++11 -pthread

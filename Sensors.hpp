@@ -7,8 +7,7 @@
 typedef struct {
 	std::string umidity;
 	std::string temperature;
-}SensorData;
-
+} SensorData;
 
 std::thread *StartSensorsThread(const char *device, SensorData *sd);
 #endif

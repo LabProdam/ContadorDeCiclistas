@@ -4,3 +4,4 @@
 *.out
 bin/*
 tmp/*
+.camera.conf
