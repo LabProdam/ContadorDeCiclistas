@@ -93,3 +93,48 @@ void ProvideOsd(cv::Mat &frame, SensorData &sd, ObjectTracker &ot) {
     strftime(buff, sizeof(buff), "%X", localtime(&time_now));		
     Print(buff, cv::Point(frame.size().width-410, textTop + textVerticalSep * 2), frame);			
 }
+
+//Config class
+Config::Config() {
+	this->data = this->LoadData();		
+}
+
+Config::~Config() {
+	this->PersistData(this->data);
+}
+
+unsigned int Config::GetLeftCounter() {
+	return this->data.left_counter;	
+}
+
+void Config::SetLeftCounter(unsigned int counter) {
+	this->data.left_counter = counter;
+} 
+
+unsigned int Config::GetRightCounter() {
+	return this->data.right_counter;
+}
+
+void Config::SetRightCounter(unsigned int counter) {
+	this->data.right_counter = counter;
+} 
+
+void Config::PersistData(configData &config) {
+	int fd = open(this->configFile, O_WRONLY|O_CREAT, S_IRUSR | S_IWUSR);
+	if (fd >= 0) {
+		write(fd, &config, sizeof(config));
+		close(fd);
+	}			
+}
+
+configData Config::LoadData() {
+	configData data;
+	memset(&data, 0, sizeof(configData));
+	int fd = open(this->configFile, O_RDONLY);
+	if (fd >= 0) {
+		read(fd, &data, sizeof(data));
+		close(fd);
+	}			
+	return data;
+}
+

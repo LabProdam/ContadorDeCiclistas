@@ -21,4 +21,31 @@ void ProvideOsd(cv::Mat &frame, ObjectTracker &ot);
 void ProvideOsd(cv::Mat &frame, SensorData &sd, ObjectTracker &ot);
 #endif
 
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <string.h>
+typedef struct {
+		unsigned int left_counter;
+		unsigned int right_counter;	
+}configData;
+
+class Config {
+private:
+	const char *configFile = ".data";
+	configData data;
+public:
+	Config();
+	~Config();
+	unsigned int GetLeftCounter();
+	void SetLeftCounter(unsigned int counter);
+	unsigned int GetRightCounter();
+	void SetRightCounter(unsigned int counter);
+	
+protected:
+	void PersistData(configData &config);	
+	configData LoadData();
+	
+};
+
 #endif
