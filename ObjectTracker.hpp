@@ -23,6 +23,10 @@ public:
 	void PrintTotal(cv::Mat &frame);
 	void PrintLeftPartial(cv::Mat &frame, cv::Point pt);
 	void PrintRightPartial(cv::Mat &frame, cv::Point pt);
+	unsigned int GetTotal();
+	unsigned int GetRightPartial();
+	unsigned int GetLeftPartial();    
+
 private:
 	void CreateNewTracker();    
 	void AddRectanglesToTracker(cv::Mat &frame, cv::Mat &fore);

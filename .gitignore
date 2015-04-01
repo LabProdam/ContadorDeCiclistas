@@ -2,5 +2,6 @@
 *.o
 *.avi
 *.out
+*.orig
 bin/*
 tmp/*

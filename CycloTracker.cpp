@@ -5,8 +5,8 @@
 #include<map>
 #include<getopt.h>
 
-#define SENSORS
-
+#include "Opt.hpp"
+#include "Utils.hpp"
 #include "ImageProcessor.hpp"
 #include "ObjectTracker.hpp"
 #include "VideoOutput.hpp"
@@ -35,41 +35,6 @@ enum InteractionAction {
         SET_INTEREST_AREA,
         NONE
 };
-
-void ProvidePip(cv::Mat &frame, cv::Mat &fore, cv::Mat &dst) {
-
-	cv::Size pip1Size(std::min(400, frame.size().width), std::min(200, frame.size().height));
-	cv::Rect pip1Rect(cv::Point(dst.size().width - pip1Size.width - 20, 20), pip1Size);
-	cv::Mat pip1;
-	cv::resize(frame, pip1, pip1Size);
-
-	cv::rectangle(dst, pip1Rect, cv::Scalar(0, 0, 255), 5);
-	pip1.copyTo(dst(pip1Rect));
-
-	/*cv::Size pip2Size(std::min(300, fore.size().width), std::min(150, fore.size().height));
-	cv::Mat rgbFore(fore.size(), CV_8UC3);
-	int from_to[]= {0,0, 0,1, 0,2};
-	cv::mixChannels(&fore, fore.channels(), &rgbFore, fore.channels(), from_to, 3);
-	cv::Rect pip2Rect(cv::Point(20, 122), pip2Size);
-	cv::Mat pip2;
-	cv::resize(rgbFore, pip2, pip2Size);
-
-	pip2.copyTo(dst(pip2Rect));*/
-
-	//Add bike to image
-	/*cv::Mat cyclistImage = cv::imread("cyclist.png", CV_LOAD_IMAGE_UNCHANGED);
-	cyclistImage.data[cyclistImage.step* 0 + 0 + 0] = 0xFF;
-	cyclistImage.data[cyclistImage.step* 0 + 0 + 1] = 0xFF;
-	cyclistImage.data[cyclistImage.step* 0 + 0 + 2] = 0xFF;
-	cv::imshow("Mini", cyclistImage);
-
-/*	cv::Mat rgbBg(rgbaBg.rows, rgbaBg.cols, CV_8UC3);
-	cv::mixChannels(&rgbaBg, 2, &rgbBg, 1, from_to, 3);
-	rgbBg.copyTo(dst(imageRect));*/
-
-
-//	cyclistImage.copyTo(dst(imageRect));
-}
 
 class InteractionHandler {
 private:
@@ -210,21 +175,6 @@ protected:
 
 void (*InteractionHandler::CurrentCallbackFunction)(int x, int y) = NULL;
 
-static void print_usage(std::string program_name) {
-	std::cout << program_name << " usage:" << std::endl <<
-		"\t--help   (-h): print this message." << std::endl <<
-		"\t--source (-s) <file_name>: Specify where data comes from." <<
-		std::endl <<
-		"\t--record (-r) <file_name>: Record video to filename." <<
-		std::endl <<
-		"\t--stream (-S) <device>: Streams video via device." <<
-		std::endl <<
-		"\t--address (-a) <address>: address must be present and must be in " <<
-		"in this format: street-number. --address faria_lima-1200." <<
-		std::endl;
-	return;
-}
-
 int main(int argc, char **argv) {
 
 	static struct option long_options[] = {
@@ -300,14 +250,15 @@ int main(int argc, char **argv) {
 		return EXIT_FAILURE;
 
     int fdwr = 0;
-	int ret_code = 0;
-	const char *c = NULL;
-	cv::VideoWriter *output;
-	VideoOutput *outputDevice;
+    int ret_code = 0;
+    const char *c = NULL;
+    cv::VideoWriter *output;
+    VideoOutput *outputDevice;
 
     cv::Mat frame;
     cv::Mat full;
-    cv::Mat fore;
+    cv::Mat fore;    
+    
     cv::VideoCapture cap(source_file);
     
 	if(!stream_device.empty()) {
@@ -368,51 +319,26 @@ int main(int argc, char **argv) {
 		
 		cap >> frame;
 		if(!record_file.empty())
-			output->write(frame); //Write avi file
+			output->write(frame); //Write avi file before frame is modified
+			
 		full = frame.clone();
 		ip.PrepareFrame(frame, cropFrame, p0, p1, p2, p3);
 		fore = ip.AcquireForeground(frame);
-		ip.InsertInterestArea(frame, interestArea);
-		//cv::imshow("Fore", fore);
-		ot.IterateTracker(frame, fore);
-		ot.PrintTotal(full);
+		ip.InsertInterestArea(frame, interestArea);		
+		ot.IterateTracker(frame, fore);		
 		ot.PrintLeftPartial(full, lCounter);
 		ot.PrintRightPartial(full, rCounter);
+		
+#ifdef SENSORS		
+		ProvideOsd(full, sd, ot);
+#else
+		ProvideOsd(full, ot);
+#endif
+		ProvidePip(frame, full);
 				  
 		cv::imshow(address, frame);
-
-#ifdef SENSORS
-		char id[20];
-		sprintf(id, "CO: %s", sd.co.c_str());
-		cv::Point ptc(full.size().width-170, full.size().height-90);
-		cv::putText(full, std::string(id),  ptc, CV_FONT_HERSHEY_PLAIN, 1, cv::Scalar(0, 0, 0), 2, CV_AA);
-		cv::putText(full, std::string(id),  ptc, CV_FONT_HERSHEY_PLAIN, 1, cv::Scalar(0, 255, 255), 1, CV_AA);
-
-		sprintf(id, "Pressao: %s Pa", sd.pressure.c_str());
-		cv::Point ptp(full.size().width-170, full.size().height-70);
-		cv::putText(full, std::string(id),  ptp, CV_FONT_HERSHEY_PLAIN, 1, cv::Scalar(0, 0, 0), 2, CV_AA);
-		cv::putText(full, std::string(id),  ptp, CV_FONT_HERSHEY_PLAIN, 1, cv::Scalar(0, 255, 255), 1, CV_AA);
-
-		cv::Point ptu(full.size().width-170, full.size().height-50);
-		sprintf(id, "Umidade: %s%%", sd.umidity.c_str());
-		cv::putText(full, std::string(id),  ptu, CV_FONT_HERSHEY_PLAIN, 1, cv::Scalar(0, 0, 0), 2, CV_AA);
-		cv::putText(full, std::string(id),  ptu, CV_FONT_HERSHEY_PLAIN, 1, cv::Scalar(0, 255, 255), 1, CV_AA);
-
-		sprintf(id, "Temperatura: %s C", sd.temperature.c_str());
-		cv::Point ptt(full.size().width-170, full.size().height-30);
-		cv::putText(full, std::string(id),  ptt, CV_FONT_HERSHEY_PLAIN, 1, cv::Scalar(0, 0, 0), 2, CV_AA);
-		cv::putText(full, std::string(id),  ptt, CV_FONT_HERSHEY_PLAIN, 1, cv::Scalar(0, 255, 255), 1, CV_AA);
-
-		sprintf(id, "Temperatura: %s", sd.temperature.c_str());
-		cv::Size sz = cv::getTextSize(id, CV_FONT_HERSHEY_PLAIN, 1, 2, NULL);
-		cv::Point ptg(full.size().width - 172 + sz.width, full.size().height-30 - (sz.height/2));
-		sprintf(id, "o", sd.temperature.c_str());
-		cv::putText(full, std::string(id),  ptg, CV_FONT_HERSHEY_PLAIN, 1, cv::Scalar(0, 0, 0), 2, CV_AA);
-		cv::putText(full, std::string(id),  ptg, CV_FONT_HERSHEY_PLAIN, 1, cv::Scalar(0, 255, 255), 1, CV_AA);      
-
-#endif
-		ProvidePip(frame, fore, full);
 		cv::imshow("Full Frame", full);
+		
 		if(!stream_device.empty())
 			outputDevice->write(frame);
 
