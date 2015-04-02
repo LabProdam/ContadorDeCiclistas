@@ -130,3 +130,7 @@ unsigned int ObjectTracker::GetRightPartial() {
 unsigned int ObjectTracker::GetLeftPartial() {
     return object_counter->GetRTLPoints();
 }
+
+void ObjectTracker::ZeroCounters() {
+    object_counter->ZeroCounters();
+}

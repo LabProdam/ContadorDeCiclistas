@@ -1,11 +1,12 @@
 #include "ObjectCounter.hpp"
+#include "Utils.hpp"
 
 ObjectCounter::ObjectCounter(cv::Rect referenceBox) {
+	Config configuration;
 	memset(this->countedPoint, -1, sizeof(this->countedPoint));
 	this->pos = 0;
-	this->totalCount = 0;
-	this->totalLeftCount = 0;
-	this->totalRightCount = 0;
+	this->totalLeftCount = configuration.GetLeftCounter();
+	this->totalRightCount = configuration.GetRightCounter();
 	this->referenceBox = referenceBox;	
 }
 
@@ -31,13 +32,15 @@ bool ObjectCounter::AccountPoint(TrackedObject point) {
 			point.pt.y > this->referenceBox.tl().y &&
 			point.pt.y < this->referenceBox.br().y)
 		{
-			this->totalCount++;
+			Config configuration;
 			
 			if (point.ltr) {
 				this->totalLeftCount++;
+				configuration.SetLeftCounter(this->totalLeftCount);
 			}
 			else {
 				this->totalRightCount++;
+				configuration.SetRightCounter(this->totalRightCount);
 			}
 			
 			this->countedPoint[pos++] = point.id;
@@ -52,7 +55,7 @@ bool ObjectCounter::AccountPoint(TrackedObject point) {
 }
 
 unsigned int ObjectCounter::GetTotalPoints() {
-	return this->totalCount;
+	return this->totalLeftCount + this->totalRightCount;
 }	
 
 unsigned int ObjectCounter::GetLTRPoints() {
@@ -61,6 +64,16 @@ unsigned int ObjectCounter::GetLTRPoints() {
 
 unsigned int ObjectCounter::GetRTLPoints() {
 	return this->totalRightCount;
+}
+
+void ObjectCounter::ZeroCounters() {
+	Config configuration;
+	
+	this->totalLeftCount = 0;
+	this->totalRightCount = 0;
+	
+	configuration.SetLeftCounter(this->totalLeftCount);
+	configuration.SetLeftCounter(this->totalRightCount);
 }
 
 void ObjectCounter::SetReferenceBox(cv::Rect referenceBox) {

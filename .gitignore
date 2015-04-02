@@ -3,5 +3,6 @@
 *.avi
 *.out
 *.orig
+*.data
 bin/*
 tmp/*

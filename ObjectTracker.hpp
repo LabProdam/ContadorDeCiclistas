@@ -25,7 +25,8 @@ public:
 	void PrintRightPartial(cv::Mat &frame, cv::Point pt);
 	unsigned int GetTotal();
 	unsigned int GetRightPartial();
-	unsigned int GetLeftPartial();    
+	unsigned int GetLeftPartial();
+	void ZeroCounters();   
 
 private:
 	void CreateNewTracker();    

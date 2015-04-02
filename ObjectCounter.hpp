@@ -8,7 +8,6 @@ class ObjectCounter {
 private:
 	unsigned int countedPoint[100];
 	unsigned short int pos;
-	unsigned int totalCount;
 	unsigned int totalLeftCount;
 	unsigned int totalRightCount;
 	cv::Rect referenceBox;
@@ -19,6 +18,7 @@ public:
 	unsigned int GetTotalPoints();		
 	unsigned int GetLTRPoints();
 	unsigned int GetRTLPoints();
+	void ZeroCounters();
 	void SetReferenceBox(cv::Rect referenceBox);
 };
 #endif

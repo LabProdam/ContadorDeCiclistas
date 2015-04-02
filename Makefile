@@ -34,4 +34,4 @@ Sensors.o: Sensors.cpp Sensors.hpp
 	g++ $< -c -o $@ --std=c++11 -pthread
 
 Utils.o: Utils.cpp Utils.hpp
-	g++ $< -c -o $@ --std=c++11 -pthread
+	g++ $< -c -o $@ --std=c++11 

@@ -344,6 +344,10 @@ int main(int argc, char **argv) {
 
 		if(cv::waitKey(30) == 27)
 			break;
+			
+		if (IsMidnight()) {
+			ot.ZeroCounters();
+		}
 		
     }
     
