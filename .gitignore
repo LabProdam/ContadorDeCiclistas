@@ -6,3 +6,4 @@
 *.data
 bin/*
 tmp/*
+.camera.conf

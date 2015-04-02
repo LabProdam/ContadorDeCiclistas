@@ -5,25 +5,22 @@
 
 #include "Opt.hpp"
 #include "ObjectTracker.hpp"
-#ifdef SENSORS
+//#ifdef SENSORS
 #include "Sensors.hpp"
-#endif
+//#endif
 
 #include<time.h>
 
 bool IsMidnight();
 
 void print_usage(std::string program_name);
+bool test_file(std::string file);
 
 void Print(const char *message, cv::Point position, cv::Mat &frame, unsigned int fontSize = 1, unsigned int thickness = 1);
 
 void ProvidePip(cv::Mat &frame, cv::Mat &dst);
 
-#ifndef SENSORS
-void ProvideOsd(cv::Mat &frame, ObjectTracker &ot);
-#else
-void ProvideOsd(cv::Mat &frame, SensorData &sd, ObjectTracker &ot);
-#endif
+void ProvideOsd(cv::Mat &frame, SensorData *sd, ObjectTracker &ot);
 
 #include <fcntl.h>
 #include <sys/stat.h>
