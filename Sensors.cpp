@@ -7,18 +7,14 @@
 #include <regex>
 
 #include "Sensors.hpp"
-//TODO: mudar para metodo da classe Sensors
-//separar funcoes dos sensores.
 void RetrieveSensorData(const char *device, SensorData *sensorData) {
 	struct termios options;
 	int fd;
 
-	//TODO colocar isso no construtor da classe.
 	if(fd = open(device, O_RDWR) < 0) {
-//		int errno2 = errno;
-//		perror("The following error occurred");
-//		std::cout << device << std::endl;
-		exit(EXIT_FAILURE); //TODO nao ser tao drastico
+		perror("The following error occurred");
+		std::cout << device << std::endl;
+		exit(EXIT_FAILURE);
 	}
 
 	tcgetattr(fd, &options);
@@ -60,7 +56,7 @@ void RetrieveSensorData(const char *device, SensorData *sensorData) {
 				sensorData->co = co[1];
 		}
 	}
-	close(fd); //TODO e isso no destrutor.
+	close(fd);
 }
 
 std::thread *StartSensorsThread(const char *device, SensorData *sd) {
