@@ -7,11 +7,11 @@
 #include<unistd.h>
 #include<fcntl.h>
 
-
+#include "Opt.hpp"
+#include "Utils.hpp"
 #include "ImageProcessor.hpp"
 #include "ObjectTracker.hpp"
 #include "VideoOutput.hpp"
-
 #include "Sensors.hpp"
 
 int x_counter[2];
@@ -208,42 +208,6 @@ protected:
 
 void (*InteractionHandler::CurrentCallbackFunction)(int x, int y) = NULL;
 
-static bool test_file(std::string file) {
-	const char *c;;
-	int fd;
-
-	if(file.empty()) return true;
-
-	c = file.c_str();
-	if((fd = open(c, O_RDWR)) < 0) {
-		std::cout << "'" << file << "': "; std::cout.flush();
-		perror("The following error occurred");
-		return false;
-	}
-	else {
-		close(fd);
-		return true;
-	}
-}
-
-static void print_usage(std::string program_name) {
-	std::cout << program_name << " usage:" << std::endl <<
-		"\t--help   (-h): print this message." << std::endl <<
-		"\t--reg_source (-s) <file_name>: Specify regular file where data comes from." <<
-		std::endl <<
-		"\t--dev_source (-D) <number>: Specify device number where data comes from." <<
-		std::endl <<
-		"\t--record (-r) <file_name>: Record video to filename." <<
-		std::endl <<
-		"\t--stream (-S) <device>: Streams video via device." <<
-		std::endl <<
-		"\t--sensor (-t) <device>: Specify device file which is a sensor." <<
-		std::endl <<
-		"\t--address (-a) <address>: address must be present and must be in " <<
-		"in this format: street-number. --address faria_lima-1200." <<
-		std::endl;
-	return;
-}
 
 //TESTE !!! inicio
 #include "CoordTransform.hpp"
@@ -419,9 +383,9 @@ int main(int argc, char **argv) {
 	//Check all files forced.
 	if(source == REG_FILE)
 		abort = !test_file(source_file);
-	abort = abort || !test_file(record_file);
-	abort = abort || !test_file(stream_device);
-	abort = abort || !test_file(sensor_device);
+	abort = !test_file(record_file)   || abort;
+	abort = !test_file(stream_device) || abort;
+	abort = !test_file(sensor_device) || abort;
 
 	if(abort)
 		return EXIT_FAILURE;
@@ -497,7 +461,7 @@ int main(int argc, char **argv) {
 
 	initCamera(frame);
 	tt();
-	exit(1);
+//	exit(1);
 
     while(1) {
 		cv::Point lCounter(x_counter[0], y_counter[0]);
@@ -527,25 +491,7 @@ int main(int argc, char **argv) {
 				  
 		cv::imshow(address, frame);
 
-		if(!sensor_device.empty()) {
-			char id[20];
-			cv::Point ptu(full.size().width-170, full.size().height-50);
-			sprintf(id, "Umidade: %s%%", sd.umidity.c_str());
-			cv::putText(full, std::string(id),  ptu, CV_FONT_HERSHEY_PLAIN, 1, cv::Scalar(0, 0, 0), 2, CV_AA);
-			cv::putText(full, std::string(id),  ptu, CV_FONT_HERSHEY_PLAIN, 1, cv::Scalar(0, 255, 255), 1, CV_AA);
-
-			sprintf(id, "Temperatura: %s C", sd.temperature.c_str());
-			cv::Point ptt(full.size().width-170, full.size().height-30);
-			cv::putText(full, std::string(id),  ptt, CV_FONT_HERSHEY_PLAIN, 1, cv::Scalar(0, 0, 0), 2, CV_AA);
-			cv::putText(full, std::string(id),  ptt, CV_FONT_HERSHEY_PLAIN, 1, cv::Scalar(0, 255, 255), 1, CV_AA);
-
-			sprintf(id, "Temperatura: %s", sd.temperature.c_str());
-			cv::Size sz = cv::getTextSize(id, CV_FONT_HERSHEY_PLAIN, 1, 2, NULL);
-			cv::Point ptg(full.size().width - 172 + sz.width, full.size().height-30 - (sz.height/2));
-			sprintf(id, "o", sd.temperature.c_str());
-			cv::putText(full, std::string(id),  ptg, CV_FONT_HERSHEY_PLAIN, 1, cv::Scalar(0, 0, 0), 2, CV_AA);
-			cv::putText(full, std::string(id),  ptg, CV_FONT_HERSHEY_PLAIN, 1, cv::Scalar(0, 255, 255), 1, CV_AA);
-		}
+		ProvideOsd(full, sensor_device.empty() ? NULL : &sd, ot);
 
 		ProvidePip(frame, fore, full);
 		cv::imshow("Full Frame", full);
@@ -553,7 +499,8 @@ int main(int argc, char **argv) {
 			outputDevice->write(frame);
 
 		if(cv::waitKey(30) == 27)
-			break;		
+			break;
+		
     }
    
 	if(!sensor_device.empty()) {

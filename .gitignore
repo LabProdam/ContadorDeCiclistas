@@ -2,6 +2,8 @@
 *.o
 *.avi
 *.out
+*.orig
+*.data
 bin/*
 tmp/*
 .camera.conf

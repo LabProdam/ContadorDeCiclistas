@@ -11,8 +11,6 @@ ObjectTracker::ObjectTracker(unsigned int distanceThreshold, double contour_thre
 void ObjectTracker::IterateTracker(cv::Mat &frame, cv::Mat &fore) {
     this->CreateNewTracker();
     this->AddRectanglesToTracker(frame, fore);
-    this->AddDate(frame);
-    this->PrintCounters(frame);  
     this->AccountNewObjects(frame);
     this->RenewTrackers();
 }
@@ -67,8 +65,9 @@ void ObjectTracker::AccountNewObjects(cv::Mat &frame) {
 	    if(object_counter->AccountPoint(rectCenter)) {
 		this->PersistImage(frame);
 	    }
-	    //TODO
-	    char id[5];
+	    
+	    
+	    char id[11];
 	    sprintf(id, "%02d", rectCenter.id);
 	    cv::putText(frame, std::string(id),  rectCenter.pt, CV_FONT_HERSHEY_PLAIN, 1, cv::Scalar(0, 255, 0));
 	}
@@ -118,4 +117,16 @@ void ObjectTracker::PrintLeftPartial(cv::Mat &frame, cv::Point pt) {
     sprintf(id, "<%02d", object_counter->GetRTLPoints());
     cv::putText(frame, std::string(id),  pt, CV_FONT_HERSHEY_PLAIN, 3, cv::Scalar(0, 0, 0), 5, CV_AA);
     cv::putText(frame, std::string(id),  pt, CV_FONT_HERSHEY_PLAIN, 3, cv::Scalar(0, 255, 255), 3, CV_AA);
+}
+
+unsigned int ObjectTracker::GetTotal() {
+    return object_counter->GetTotalPoints();
+}
+
+unsigned int ObjectTracker::GetRightPartial() {
+    return object_counter->GetLTRPoints();
+}
+
+unsigned int ObjectTracker::GetLeftPartial() {
+    return object_counter->GetRTLPoints();
 }

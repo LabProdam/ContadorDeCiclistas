@@ -8,7 +8,8 @@ OBJ=CycloTracker.o \
 	TrackedObject.o \
 	Sensors.o \
 	Camera.o \
-	CoordTransform.o
+	CoordTransform.o \
+	Utils.o
 
 CFLAGS=-Wall \
 	   -Wextra \
@@ -27,4 +28,3 @@ bin/CycloTracker: $(OBJ)
 
 %.o: %.cpp
 	g++ -c $< -o $@ --std=c++11
-
