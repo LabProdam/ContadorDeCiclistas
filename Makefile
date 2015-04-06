@@ -24,7 +24,7 @@ clean:
 bin/CycloTracker: $(OBJ)
 	@mkdir -p bin
 	@mkdir -p tmp
-	g++ $^ -o $@ `pkg-config --libs opencv` --std=c++11
+	g++ $^ -o $@ `pkg-config --libs opencv` --std=c++11 -g
 
 %.o: %.cpp
-	g++ -c $< -o $@ --std=c++11 -pthread
+	g++ -c $< -o $@ --std=c++11 -pthread -g

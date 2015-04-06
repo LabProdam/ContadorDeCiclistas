@@ -28,7 +28,20 @@ void ProvideOsd(cv::Mat &frame, SensorData *sd, ObjectTracker &ot);
 #include <string.h>
 typedef struct {
 		unsigned int left_counter;
-		unsigned int right_counter;	
+		unsigned int right_counter;
+		
+		int x_counter[2];
+		int y_counter[2];
+
+		int x[4];
+		int y[4];
+
+		int x_crop[2];
+		int y_crop[2];
+
+		int x_interest[2];
+		int y_interest[2];
+		
 }configData;
 
 class Config {
@@ -42,6 +55,18 @@ public:
 	void SetLeftCounter(unsigned int counter);
 	unsigned int GetRightCounter();
 	void SetRightCounter(unsigned int counter);
+	
+	cv::Point GetCounterPos(unsigned int index);
+	void SetCounterPos(unsigned int index, cv::Point pt);
+	
+	cv::Point GetPerspectivePos(unsigned int index);
+	void SetPerspectivePos(unsigned int index, cv::Point pt);
+	
+	cv::Point GetCropPos(unsigned int index);
+	void SetCropPos(unsigned int index, cv::Point pt);
+	
+	cv::Point GetInterestPos(unsigned int index);
+	void SetInterestPos(unsigned int index, cv::Point pt);	
 	
 protected:
 	void PersistData(configData &config);	

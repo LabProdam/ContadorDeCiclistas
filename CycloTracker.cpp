@@ -14,17 +14,77 @@
 #include "VideoOutput.hpp"
 #include "Sensors.hpp"
 
-int x_counter[2];
-int y_counter[2];
+unsigned int x_counter[2];
+unsigned int y_counter[2];
 
-int x[4];
-int y[4];
+unsigned int x[4];
+unsigned int y[4];
 
-int x_crop[2];
-int y_crop[2];
+unsigned int x_crop[2];
+unsigned int y_crop[2];
 
-int x_interest[2];
-int y_interest[2];
+unsigned int x_interest[2];
+unsigned int y_interest[2];
+
+void LoadConfiguration() {
+	Config cfg;
+	
+	for (int i = 0; i < sizeof(x_counter) / sizeof(x_counter[0]); i++) {
+		cv::Point pt = cfg.GetCounterPos(i);
+		x_counter[i] = pt.x;
+		y_counter[i] = pt.y;
+	}
+	
+	for (int i = 0; i < sizeof(x) / sizeof(x[0]); i++) {
+		cv::Point pt = cfg.GetPerspectivePos(i);
+		x[i] = pt.x;
+		y[i] = pt.y;
+	}
+	
+	for (int i = 0; i < sizeof(x_crop) / sizeof(x_crop[0]); i++) {
+		cv::Point pt = cfg.GetCropPos(i);
+		x_crop[i] = pt.x;
+		y_crop[i] = pt.y;
+	}
+	
+	for (int i = 0; i < sizeof(x_interest) / sizeof(x_interest[0]); i++) {
+		cv::Point pt = cfg.GetInterestPos(i);
+		x_interest[i] = pt.x;
+		y_interest[i] = pt.y;
+	}	
+}
+
+void SaveConfiguration() {
+	Config cfg;
+	
+	for (int i = 0; i < sizeof(x_counter) / sizeof(x_counter[0]); i++) {
+		cv::Point pt;
+		pt.x = x_counter[i];
+		pt.y = y_counter[i];
+		cfg.SetCounterPos(i, pt);
+	}
+	
+	for (int i = 0; i < sizeof(x) / sizeof(x[0]); i++) {
+		cv::Point pt;
+		pt.x = x[i];
+		pt.y = y[i];
+		cfg.SetPerspectivePos(i, pt);		
+	}
+	
+	for (int i = 0; i < sizeof(x_crop) / sizeof(x_crop[0]); i++) {
+		cv::Point pt;
+		pt.x = x_crop[i];
+		pt.y = y_crop[i];
+		cfg.SetCropPos(i, pt);
+	}
+	
+	for (int i = 0; i < sizeof(x_interest) / sizeof(x_interest[0]); i++) {
+		cv::Point pt;
+		pt.x = x_interest[i];
+		pt.y = y_interest[i];
+		cfg.SetInterestPos(i, pt);		
+	}	
+}
 
 enum InteractionAction {
         SET_COUNTERS_AREA,
@@ -164,7 +224,8 @@ protected:
                             ::x_interest[i] = x_internal[i];
                             ::y_interest[i] = y_internal[i];
                     }
-                    InteractionHandler::SetAction(InteractionAction::NONE);
+		    SaveConfiguration();
+                    InteractionHandler::SetAction(InteractionAction::NONE); 		    
                     return;                    
             }
             step++;
@@ -256,6 +317,7 @@ int main(int argc, char **argv) {
 
     static struct option long_options[] = {
     	{ "reg_source", required_argument, NULL, 's'},
+    	{ "override", 	required_argument, NULL, 'O'},
     	{ "dev_source", required_argument, NULL, 'D'},
     	{ "record",     required_argument, NULL, 'r'},
     	{ "stream",     required_argument, NULL, 'S'},
@@ -273,11 +335,12 @@ int main(int argc, char **argv) {
     std::string stream_device  = ""; //device file used to stream data.
     std::string address        = ""; //address where program is running on.
     std::string sensor_device  = ""; //sensor device file.
+    bool pick_points = false;
     bool help = false;
     bool abort = false;
     int source = UNK_FILE;
 
-    while((opt = getopt_long(argc, argv, "s:r:S:t:a:D:h", long_options, &long_index))
+    while((opt = getopt_long(argc, argv, "s:r:S:t:a:D:hO", long_options, &long_index))
     		!= -1) {
     	switch(opt) {
     		case 's':
@@ -302,6 +365,9 @@ int main(int argc, char **argv) {
     			break;
     		case 'h':
     			help = true;
+    			break;
+		case 'O':
+    			pick_points = true;
     			break;
     		default:
     			return EXIT_FAILURE;
@@ -399,26 +465,31 @@ int main(int argc, char **argv) {
     memset(x_counter, 0, sizeof(x_counter));
     memset(y_counter, 0, sizeof(y_counter));
     
-    x[0] = 0                ; y[0] = 0;
-    x[1] = frame_size.width ; y[1] = 0;
-    x[2] = 0                ; y[2] = frame_size.height;
-    x[3] = frame_size.width ; y[3] = frame_size.height;
+    if (!pick_points) {
+	LoadConfiguration();
+    }
+    
+    //x[0] = 0                ; y[0] = 0;
+    x[1] = x[1]?x[1]:frame_size.width ; //y[1] = 0;
+    /*x[2] = 0                ; */ y[2] = y[2]?y[2]:frame_size.height;
+    x[3] = x[3]?x[3]:frame_size.width ; y[3] = y[3]?y[3]:frame_size.height;
    
-    x_crop[0] = 0                 ; y_crop[0] = 0;
-    x_crop[1] = frame_size.width  ; y_crop[1] = frame_size.height;
+    //x_crop[0] = 0                 ; y_crop[0] = 0;
+    x_crop[1] = x_crop[1]?x_crop[1]:frame_size.width  ; y_crop[1] = y_crop[1]?y_crop[1]:frame_size.height;
     
-    x_interest[0] = 0; y_interest[0] = 0;
-    x_interest[1] = 1; y_interest[1] = 1;
-    
+    //x_interest[0] = 0; y_interest[0] = 0;
+    //x_interest[1] = 1; y_interest[1] = 1;    
       
     int imageNum = 0;
     
     cv::imshow(address, frame);    
-    InteractionHandler::Subscribe(address);
-    
-    printf("Selecione Ponto de Contador a Esquerda\n");
-    InteractionHandler::SetAction(InteractionAction::SET_COUNTERS_AREA);
-
+        
+    if (pick_points) {
+	    InteractionHandler::Subscribe(address);
+		
+	    printf("Selecione Ponto de Contador a Esquerda\n");
+	    InteractionHandler::SetAction(InteractionAction::SET_COUNTERS_AREA);
+    }
     cv::Rect interestArea(x_interest[0], y_interest[0], x_interest[1] - x_interest[0], y_interest[1] - y_interest[0]);
     ObjectTracker ot(30, 50, interestArea);
 
