@@ -107,7 +107,7 @@ void ProvideOsd(cv::Mat &frame, SensorData *sd, ObjectTracker &ot) {
     }
 
     sprintf(mesgBuf, "%d", ot.GetTotal());
-    Print(mesgBuf, cv::Point(frame.size().width-290, textTop + 7), frame, 2);
+    Print(mesgBuf, cv::Point(frame.size().width-300, textTop + 7), frame, 2);
 
     sprintf(mesgBuf, "Hoje");
     Print(mesgBuf, cv::Point(frame.size().width-275, textTop + textVerticalSep* 2), frame, 2);

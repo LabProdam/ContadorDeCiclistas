@@ -4,6 +4,7 @@
 *.out
 *.orig
 *.data
+*.log
 bin/*
 tmp/*
 .camera.conf

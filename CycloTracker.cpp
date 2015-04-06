@@ -414,7 +414,6 @@ int main(int argc, char **argv) {
     //Check all files forced.
     if(source == REG_FILE)
     	abort = !test_file(source_file);
-    abort = !test_file(record_file)   || abort;
     abort = !test_file(stream_device) || abort;
     abort = !test_file(sensor_device) || abort;
 
