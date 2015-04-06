@@ -11,7 +11,7 @@ OBJ=CycloTracker.o \
 	CoordTransform.o \
 	Utils.o
 
-CFLAGS=-Wall \
+	CFLAGS=-Wall \
 	   -Wextra \
 	   -O2
 
@@ -27,4 +27,4 @@ bin/CycloTracker: $(OBJ)
 	g++ $^ -o $@ `pkg-config --libs opencv` --std=c++11
 
 %.o: %.cpp
-	g++ -c $< -o $@ --std=c++11
+	g++ -c $< -o $@ --std=c++11 -pthread

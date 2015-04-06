@@ -10,8 +10,8 @@
 void RetrieveSensorData(const char *device, SensorData *sensorData) {
 	struct termios options;
 	int fd;
-	
-	if(fd = open(device, O_RDWR) < 0) {
+
+	if((fd = open(device, O_RDWR)) < 0) {
 		perror("The following error occurred");
 		std::cout << device << std::endl;
 		exit(EXIT_FAILURE);
@@ -33,12 +33,10 @@ void RetrieveSensorData(const char *device, SensorData *sensorData) {
 	char buff[80];
 	int readBytes;
 
-	while(1) {		
+	while(1) {
 		usleep(500000);
-		memset(buff, 0, sizeof(buff));		
+		memset(buff, 0, sizeof(buff));
 		readBytes = read(fd, buff, sizeof(buff));
-		printf("-->%s\n", buff);
-		exit(1);
 		if (readBytes) {		
 			std::cmatch umidity;
 			std::cmatch temperature;
