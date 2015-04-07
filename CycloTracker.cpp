@@ -160,12 +160,14 @@ protected:
 				break;
 			case 1:			  
 				step = 0;
-				for (unsigned int i = 0; i < sizeof(::x_counter)/sizeof(::x_counter[0]); i++) {
+				for (unsigned int i = 0;
+					 i < sizeof(::x_counter)/sizeof(::x_counter[0]); i++) {
 						::x_counter[i] = x_internal[i];
 						::y_counter[i] = y_internal[i];
 				}
 				printf("Selecione Ponto de Perspectiva Inicial\n");
-				InteractionHandler::SetAction(InteractionAction::SET_PERSPECTIVE_AREA);
+				InteractionHandler::SetAction(InteractionAction::
+						SET_PERSPECTIVE_AREA);
 				return;					
 			default:
 				printf("Error: GetCountersArea: step = %d\n", step);

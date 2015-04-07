@@ -9,9 +9,9 @@
 
 class ObjectTracker { 
 private:
-	RectangleTracker *old_tracker = NULL;
-	RectangleTracker *new_tracker = NULL;
-	ObjectLocator *object_locator = NULL;
+	RectangleTracker *old_tracker = nullptr;
+	RectangleTracker *new_tracker = nullptr;
+	ObjectLocator *object_locator = nullptr;
 	ObjectCounter *object_counter;
 	unsigned int distance_threshold;
 	unsigned int image_counter = 0;

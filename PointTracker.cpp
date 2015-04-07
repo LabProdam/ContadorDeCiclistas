@@ -17,7 +17,7 @@ int PointTracker::DistanceInThreshold(cv::Point &a, cv::Point &b) {
 
 PointTracker::PointTracker(unsigned int threshold) {
 	this->maximum_threshold = threshold;
-	this->reference = NULL;
+	this->reference = nullptr;
 }
 
 PointTracker::PointTracker(unsigned int threshold, PointTracker reference) {

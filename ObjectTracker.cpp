@@ -51,7 +51,7 @@ void ObjectTracker::AddDate(cv::Mat &frame) {
 
 	strftime(buff, sizeof(buff), "%X", localtime(&time_now));
 	cv::Size sz = cv::getTextSize(std::string(buff), CV_FONT_HERSHEY_PLAIN, 1,
-								  2, NULL);
+								  2, nullptr);
 	cv::putText(frame,
 				std::string(buff),
 				cv::Point(frame.size().width - sz.width - 2, yPos),
@@ -93,7 +93,7 @@ void ObjectTracker::AccountNewObjects(cv::Mat &frame) {
 						cv::Scalar(0, 255, 0));
 		}
 		delete old_tracker;
-		old_tracker = NULL;
+		old_tracker = nullptr;
 	}
 }
 
