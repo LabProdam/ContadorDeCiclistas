@@ -11,7 +11,7 @@ void RetrieveSensorData(const char *device, SensorData *sensorData) {
 	struct termios options;
 	int fd;
 
-	if(fd = open(device, O_RDWR) < 0) {
+	if((fd = open(device, O_RDWR)) < 0) {
 		perror("The following error occurred");
 		std::cout << device << std::endl;
 		exit(EXIT_FAILURE);
@@ -24,36 +24,45 @@ void RetrieveSensorData(const char *device, SensorData *sensorData) {
 	options.c_cflag |= (CLOCAL | CREAD);
 
 	tcsetattr(fd, TCSANOW, &options);
-
-	std::regex umidityRe("U:(\\d+)");
-	std::regex temperatureRe("T2:(\\d+)");
-	std::regex pressureRe("P:(\\d+)");
-	std::regex coRe("MQ7:(\\d+)");
-
-	char buff[80];
+#define BUFFSIZE 200
+	char buff[BUFFSIZE];
 	int readBytes;
 
 	while(1) {
 		usleep(500000);
 		memset(buff, 0, sizeof(buff));
 		readBytes = read(fd, buff, sizeof(buff));
-		if (readBytes) {		
-			std::cmatch umidity;
-			std::cmatch temperature;
-			std::cmatch pressure;
-			std::cmatch co;
-			std::regex_search(buff, umidity, umidityRe);
-			std::regex_search(buff, temperature, temperatureRe);
-			std::regex_search(buff, pressure, pressureRe);
-			std::regex_search(buff, co, coRe);
-			if (umidity[1].length())
-				sensorData->umidity = umidity[1];
-			if (temperature[1].length())
-				sensorData->temperature = temperature[1];
-			if (pressure[1].length())
-				sensorData->pressure = pressure[1];
-			if (co[1].length())
-				sensorData->co = co[1];
+		buff[BUFFSIZE - 2] = '\n';
+		buff[BUFFSIZE - 1] = '\0';
+		printf("%s\n", buff);
+		if (readBytes > 0) {
+			int i = 0, colon_count = 0;
+			bool stop = false;
+			while((i < readBytes) && !stop) {
+				if(buff[i++] == ':') {
+					colon_count++;
+					switch(colon_count) {
+						case 1:
+							sscanf(buff + i, "%d", &sensorData->umidity);
+							break;
+						case 2:
+							break;
+						case 3:
+							sscanf(buff + i, "%d", &sensorData->temperature);
+							break;
+						case 4:
+							sscanf(buff + i, "%d", &sensorData->pressure);
+							break;
+						case 5:
+							sscanf(buff + i, "%d", &sensorData->co);
+							stop = true;
+							break;
+						default:
+							std::cout << "error fetching sensor data\n" << std::endl;
+							break;
+					}
+				}
+			}
 		}
 	}
 	close(fd);

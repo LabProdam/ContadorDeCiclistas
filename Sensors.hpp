@@ -5,10 +5,10 @@
 #include <thread>
 
 typedef struct {
-	std::string umidity;
-	std::string temperature;
-	std::string pressure;
-	std::string co;
+	int umidity;
+	int temperature;
+	int pressure;
+	int co;
 }SensorData;
 
 

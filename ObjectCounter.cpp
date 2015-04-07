@@ -21,7 +21,7 @@ bool ObjectCounter::AccountPoint(TrackedObject point) {
 		}
 	}
 	
-		printf("id: %d, Width: %d, Traj: %f\n", point.id, point.rect.width, fabs(point.pt.x - point.pt0.x) );
+//		printf("id: %d, Width: %d, Traj: %f\n", point.id, point.rect.width, fabs(point.pt.x - point.pt0.x) );
 	
 	if (newElement && 
 		point.framesAlive > 2 &&

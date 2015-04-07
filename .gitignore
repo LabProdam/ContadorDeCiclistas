@@ -7,3 +7,5 @@
 bin/*
 tmp/*
 .camera.conf
+gdb_cmds
+throw_sensor_data.sh
