@@ -4,8 +4,6 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-#include <regex>
-
 #include "Sensors.hpp"
 void RetrieveSensorData(const char *device, SensorData *sensorData) {
 	struct termios options;
@@ -41,6 +39,8 @@ void RetrieveSensorData(const char *device, SensorData *sensorData) {
 			while((i < readBytes) && !stop) {
 				if(buff[i++] == ':') {
 					colon_count++;
+//We are assuming that string provided by sensor is formated as follow:
+//U:xx.xx%    T1:xx.xxC    T2:xx.xxC     P:xPa     Q7:xx
 					switch(colon_count) {
 						case 1:
 							sscanf(buff + i, "%d", &sensorData->umidity);
@@ -58,7 +58,8 @@ void RetrieveSensorData(const char *device, SensorData *sensorData) {
 							stop = true;
 							break;
 						default:
-							std::cout << "error fetching sensor data\n" << std::endl;
+							std::cout << "error fetching sensor data\n" <<
+								std::endl;
 							break;
 					}
 				}

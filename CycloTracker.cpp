@@ -14,218 +14,274 @@
 #include "VideoOutput.hpp"
 #include "Sensors.hpp"
 
-int x_counter[2];
-int y_counter[2];
+unsigned int x_counter[2];
+unsigned int y_counter[2];
 
-int x[4];
-int y[4];
+unsigned int x[4];
+unsigned int y[4];
 
-int x_crop[2];
-int y_crop[2];
+unsigned int x_crop[2];
+unsigned int y_crop[2];
 
-int x_interest[2];
-int y_interest[2];
+unsigned int x_interest[2];
+unsigned int y_interest[2];
+
+void LoadConfiguration(void);
+void LoadConfiguration(void) {
+	Config cfg;
+	unsigned int i;
+	
+	for (i = 0; i < sizeof(x_counter) / sizeof(x_counter[0]); i++) {
+		cv::Point pt = cfg.GetCounterPos(i);
+		x_counter[i] = pt.x;
+		y_counter[i] = pt.y;
+	}
+	
+	for (i = 0; i < sizeof(x) / sizeof(x[0]); i++) {
+		cv::Point pt = cfg.GetPerspectivePos(i);
+		x[i] = pt.x;
+		y[i] = pt.y;
+	}
+	
+	for (i = 0; i < sizeof(x_crop) / sizeof(x_crop[0]); i++) {
+		cv::Point pt = cfg.GetCropPos(i);
+		x_crop[i] = pt.x;
+		y_crop[i] = pt.y;
+	}
+	
+	for (i = 0; i < sizeof(x_interest) / sizeof(x_interest[0]); i++) {
+		cv::Point pt = cfg.GetInterestPos(i);
+		x_interest[i] = pt.x;
+		y_interest[i] = pt.y;
+	}	
+}
+
+void SaveConfiguration(void);
+void SaveConfiguration(void) {
+	Config cfg;
+	unsigned int i;
+	
+	for (i = 0; i < sizeof(x_counter) / sizeof(x_counter[0]); i++) {
+		cv::Point pt;
+		pt.x = x_counter[i];
+		pt.y = y_counter[i];
+		cfg.SetCounterPos(i, pt);
+	}
+	
+	for (i = 0; i < sizeof(x) / sizeof(x[0]); i++) {
+		cv::Point pt;
+		pt.x = x[i];
+		pt.y = y[i];
+		cfg.SetPerspectivePos(i, pt);		
+	}
+	
+	for (i = 0; i < sizeof(x_crop) / sizeof(x_crop[0]); i++) {
+		cv::Point pt;
+		pt.x = x_crop[i];
+		pt.y = y_crop[i];
+		cfg.SetCropPos(i, pt);
+	}
+	
+	for (i = 0; i < sizeof(x_interest) / sizeof(x_interest[0]); i++) {
+		cv::Point pt;
+		pt.x = x_interest[i];
+		pt.y = y_interest[i];
+		cfg.SetInterestPos(i, pt);		
+	}	
+}
 
 enum InteractionAction {
-        SET_COUNTERS_AREA,
-        SET_PERSPECTIVE_AREA,
-        SET_CROP_AREA,
-        SET_INTEREST_AREA,
-        NONE
+	SET_COUNTERS_AREA,
+	SET_PERSPECTIVE_AREA,
+	SET_CROP_AREA,
+	SET_INTEREST_AREA,
+	NONE
 };
-
-void ProvidePip(cv::Mat &frame, cv::Mat &fore, cv::Mat &dst) {
-
-	cv::Size pip1Size(std::min(400, frame.size().width), std::min(200, frame.size().height));
-	cv::Rect pip1Rect(cv::Point(dst.size().width - pip1Size.width - 20, 20), pip1Size);
-	cv::Mat pip1;
-	cv::resize(frame, pip1, pip1Size);
-
-	cv::rectangle(dst, pip1Rect, cv::Scalar(0, 0, 255), 5);
-	pip1.copyTo(dst(pip1Rect));
-
-	/*cv::Size pip2Size(std::min(300, fore.size().width), std::min(150, fore.size().height));
-	cv::Mat rgbFore(fore.size(), CV_8UC3);
-	int from_to[]= {0,0, 0,1, 0,2};
-	cv::mixChannels(&fore, fore.channels(), &rgbFore, fore.channels(), from_to, 3);
-	cv::Rect pip2Rect(cv::Point(20, 122), pip2Size);
-	cv::Mat pip2;
-	cv::resize(rgbFore, pip2, pip2Size);
-
-	pip2.copyTo(dst(pip2Rect));*/
-
-	//Add bike to image
-	/*cv::Mat cyclistImage = cv::imread("cyclist.png", CV_LOAD_IMAGE_UNCHANGED);
-	cyclistImage.data[cyclistImage.step* 0 + 0 + 0] = 0xFF;
-	cyclistImage.data[cyclistImage.step* 0 + 0 + 1] = 0xFF;
-	cyclistImage.data[cyclistImage.step* 0 + 0 + 2] = 0xFF;
-	cv::imshow("Mini", cyclistImage);
-
-/*	cv::Mat rgbBg(rgbaBg.rows, rgbaBg.cols, CV_8UC3);
-	cv::mixChannels(&rgbaBg, 2, &rgbBg, 1, from_to, 3);
-	rgbBg.copyTo(dst(imageRect));*/
-
-
-//	cyclistImage.copyTo(dst(imageRect));
-}
 
 class InteractionHandler {
 private:
-        static void (*CurrentCallbackFunction)(int x, int y);
+	static void (*CurrentCallbackFunction)(int x, int y);
 public:
-        static void Subscribe(std::string windowName) {
-                cv::setMouseCallback(windowName.c_str(), InteractionHandler::MouseCallback, NULL);
-        }
+	static void Subscribe(std::string windowName) {
+		cv::setMouseCallback(windowName.c_str(),
+							 InteractionHandler::MouseCallback, nullptr);
+	}
 
-        static void SetAction(InteractionAction action) {
-            switch (action) {
-		case SET_COUNTERS_AREA:
-                    CurrentCallbackFunction = GetCountersArea;
-		break;
-                case SET_PERSPECTIVE_AREA:
-                    CurrentCallbackFunction = GetPerspectivePoints;
-                break;
-                case SET_CROP_AREA:
-                    CurrentCallbackFunction = GetCropFrame;
-                break;
-                case SET_INTEREST_AREA:
-                    CurrentCallbackFunction = GetInterestArea;
-                break;
-                case NONE:
-                    CurrentCallbackFunction = NULL;
-                break;
-            }
-        }
-        
+	static void SetAction(InteractionAction action) {
+		switch (action) {
+			case SET_COUNTERS_AREA:
+				CurrentCallbackFunction = GetCountersArea;
+				break;
+			case SET_PERSPECTIVE_AREA:
+				CurrentCallbackFunction = GetPerspectivePoints;
+				break;
+			case SET_CROP_AREA:
+				CurrentCallbackFunction = GetCropFrame;
+				break;
+			case SET_INTEREST_AREA:
+				CurrentCallbackFunction = GetInterestArea;
+				break;
+			case NONE:
+				CurrentCallbackFunction = nullptr;
+				break;
+			default:
+				printf("Error: SetAction: action = %d\n", action);
+				exit(EXIT_FAILURE);
+				break;
+		}
+	}
+
 protected:
-        static void MouseCallback(int event, int x, int y, int flags, void *data) {
-            if (CurrentCallbackFunction) {
-                    switch(event) {
-                        case(cv::EVENT_LBUTTONDOWN):
-                            CurrentCallbackFunction(x, y);
-                            break;
-                    }
-            }
-        }      
- 
-        static void GetCountersArea(int x, int y) {
-            static int step = 0;
-            static int x_internal[2];
-            static int y_internal[2];
-            x_internal[step] = x;
-            y_internal[step] = y;
-            switch (step) {
-                case 0:
-                    printf("Ponto %d %d\nSelecione Ponto de Contador a Direita\n");
-                    break;
-                case 1:              
-                    step = 0;
-                    for (int i = 0; i < sizeof(::x_counter)/sizeof(::x_counter[0]); i++) {
-                            ::x_counter[i] = x_internal[i];
-                            ::y_counter[i] = y_internal[i];
-                    }
-                    printf("Selecione Ponto de Perspectiva Inicial\n");
-                    InteractionHandler::SetAction(InteractionAction::SET_PERSPECTIVE_AREA);
-                    return;                    
-            }
-            step++;
-        }
-                
-        static void GetPerspectivePoints(int x, int y) {
-            static int step = 0;
-            static int x_internal[4];
-            static int y_internal[4];
-            x_internal[step] = x;
-            y_internal[step] = y;
-            switch (step) {
-                case 0:
-                    printf("Ponto %d %d\nSelecione 2\n");
-                    break;
-                case 1:
-                    printf("Ponto %d %d\nSelecione 3\n");
-                    break;
-                case 2:
-                    printf("Ponto %d %d\nSelecione 4\n");
-                    break;
-                case 3:
-                    step = 0;
-                    for (int i = 0; i < sizeof(::x)/sizeof(::x[0]); i++) {
-                            ::x[i] = x_internal[i];
-                            ::y[i] = y_internal[i];
-                    }
-                    printf("Selecione Ponto de Crop Inicial\n");
-                    InteractionHandler::SetAction(InteractionAction::SET_CROP_AREA);
-                    return;                    
-            }
-            step++;
-        }
-        
-        static void GetCropFrame(int x, int y) {
-            static int step = 0;
-            static int x_internal[2];
-            static int y_internal[2];
-            x_internal[step] = x;
-            y_internal[step] = y;
-            switch (step) {
-                case 0:
-                    printf("Ponto %d %d\nSelecione 2\n");
-                    break;
-                case 1:
-                    step = 0;
-                    for (int i = 0; i < sizeof(::x_crop)/sizeof(::x_crop[0]); i++) {
-                            ::x_crop[i] = x_internal[i];
-                            ::y_crop[i] = y_internal[i];
-                    }
-                    printf("Selecione Ponto de Interesse Inicial\n");
-                    InteractionHandler::SetAction(InteractionAction::SET_INTEREST_AREA);
-                    return;                    
-            }
-            step++;
-        }
-        
-         static void GetInterestArea(int x, int y) {
-            static int step = 0;
-            static int x_internal[2];
-            static int y_internal[2];
-            x_internal[step] = x;
-            y_internal[step] = y;
-            switch (step) {
-                case 0:
-                    printf("Ponto %d %d\nSelecione 2\n");
-                    break;
-                case 1:
-                    step = 0;
-                    for (int i = 0; i < sizeof(::x_interest)/sizeof(::x_interest[0]); i++) {
-                            ::x_interest[i] = x_internal[i];
-                            ::y_interest[i] = y_internal[i];
-                    }
-                    InteractionHandler::SetAction(InteractionAction::NONE);
-                    return;                    
-            }
-            step++;
-        }
+	static void MouseCallback(int event, int x, int y,
+			int __attribute__((__unused__)) flags,
+			void __attribute__((__unused__)) *data) {
+		if (CurrentCallbackFunction) {
+			switch(event) {
+				case(cv::EVENT_LBUTTONDOWN):
+					CurrentCallbackFunction(x, y);
+					break;
+				default:
+					printf("Error: MouseCallback: event = %d\n", event);
+					exit(EXIT_FAILURE);
+					break;
+			}
+		}
+	}	  
+
+	static void GetCountersArea(int x, int y) {
+		static int step = 0;
+		static int x_internal[2];
+		static int y_internal[2];
+		x_internal[step] = x;
+		y_internal[step] = y;
+		switch (step) {
+			case 0:
+				printf("Selecione Ponto de Contador a Direita\n");
+				break;
+			case 1:			  
+				step = 0;
+				for (unsigned int i = 0; i < sizeof(::x_counter)/sizeof(::x_counter[0]); i++) {
+						::x_counter[i] = x_internal[i];
+						::y_counter[i] = y_internal[i];
+				}
+				printf("Selecione Ponto de Perspectiva Inicial\n");
+				InteractionHandler::SetAction(InteractionAction::SET_PERSPECTIVE_AREA);
+				return;					
+			default:
+				printf("Error: GetCountersArea: step = %d\n", step);
+				exit(EXIT_FAILURE);
+				break;
+		}
+		step++;
+	}
+			
+	static void GetPerspectivePoints(int x, int y) {
+		static int step = 0;
+		static int x_internal[4];
+		static int y_internal[4];
+		x_internal[step] = x;
+		y_internal[step] = y;
+		switch (step) {
+			case 0:
+			case 1:
+			case 2:
+				printf("Selecione %d\n", step + 2);
+				break;
+			case 3:
+				step = 0;
+				for (unsigned int i = 0; i < sizeof(::x)/sizeof(::x[0]); i++) {
+						::x[i] = x_internal[i];
+						::y[i] = y_internal[i];
+				}
+				printf("Selecione Ponto de Crop Inicial\n");
+				InteractionHandler::SetAction(InteractionAction::SET_CROP_AREA);
+				return;
+			default:
+				printf("Erro GetPerspectivePoints!! step == %d\n", step);
+				exit(EXIT_FAILURE);
+				break;
+		}
+		step++;
+	}
+	
+	static void GetCropFrame(int x, int y) {
+		static int step = 0;
+		static int x_internal[2];
+		static int y_internal[2];
+		x_internal[step] = x;
+		y_internal[step] = y;
+		switch (step) {
+			case 0:
+				printf("Selecione 2\n");
+				break;
+			case 1:
+				step = 0;
+				for (unsigned int i = 0; i < sizeof(::x_crop)/sizeof(::x_crop[0]); i++) {
+						::x_crop[i] = x_internal[i];
+						::y_crop[i] = y_internal[i];
+				}
+				printf("Selecione Ponto de Interesse Inicial\n");
+				InteractionHandler::SetAction(InteractionAction::SET_INTEREST_AREA);
+				return;
+			default:
+				printf("Error: GetCropFrame: step = %d\n", step);
+				exit(EXIT_FAILURE);
+				break;
+		}
+		step++;
+	}
+	
+	 static void GetInterestArea(int x, int y) {
+		static int step = 0;
+		static int x_internal[2];
+		static int y_internal[2];
+		x_internal[step] = x;
+		y_internal[step] = y;
+		switch (step) {
+			case 0:
+				printf("Selecione 2\n");
+				break;
+			case 1:
+				step = 0;
+				for (unsigned int i = 0;
+					 i < sizeof(::x_interest)/sizeof(::x_interest[0]); i++) {
+					::x_interest[i] = x_internal[i];
+					::y_interest[i] = y_internal[i];
+				}
+				SaveConfiguration();
+				InteractionHandler::SetAction(InteractionAction::NONE);
+				return;					
+			default:
+				printf("Error: GetInterestArea: step = %d\n", step);
+				exit(EXIT_FAILURE);
+				break;
+		}
+		step++;
+	}
 };
 
-void (*InteractionHandler::CurrentCallbackFunction)(int x, int y) = NULL;
+void (*InteractionHandler::CurrentCallbackFunction)(int x, int y) = nullptr;
 
 
 //TESTE !!! inicio
 #include "CoordTransform.hpp"
 #include "Camera.hpp"
 #define PI (4 * atan(tan(1.)))
+void initCamera(cv::Mat& f);
 void initCamera(cv::Mat& f) {
 	Camera cam;
 	cam.SetFrameRows(f.rows);
 	cam.SetFrameCols(f.cols);
 	cv::Point2f A, B;
-	A.x = 362; A.y = 86;  //ponto de cima da trena  (foto em que estou na parede)
-	B.x = 364; B.y = 225; //ponto de baixo da trena (foto em que estou na parede)
+	A.x = 362; A.y = 86; //ponto de cima da trena  (foto em que estou na parede)
+	B.x = 364; B.y = 225;//ponto de baixo da trena (foto em que estou na parede)
 	float distTrenaCamera = 6.;
 	float tamTrena = 1.;
 	//nao e' necessario mudar as coordenadas de A e B pois o metodo abaixo usa a
 	//distancia entre A e B.
 	cam.SetFocalDistance(distTrenaCamera, tamTrena, A, B);
-	std::cout << "focal distance " << cam.GetFocalDistance() << "px" << std::endl;
+	std::cout << "focal distance " << cam.GetFocalDistance() << "px" <<
+		std::endl;
 	A.x = 389; A.y = 194;
 	B.x = 388; B.y = 228;
 	float coquinhoAteX = 1.43;
@@ -249,20 +305,27 @@ void initCamera(cv::Mat& f) {
 	PP2.x = 251; PP2.y = 90; //semafoto bottom
 	asd = CoordTransform::GetRealRyFromImageiPoint(cam, PP1);
 	zxc = CoordTransform::GetRealRyFromImageiPoint(cam, PP2);
-	std::cout << "h1 = " << asd << " . h2 = " << zxc << ".... |h1-h2| = " << fabs(asd - zxc) << std::endl;
+	std::cout << "h1 = " << asd << " . h2 = " << zxc << ".... |h1-h2| = " <<
+		fabs(asd - zxc) << std::endl;
 	PP1.y = 275; //vassoura top
 	PP2.y = 288; //vassoura bottom
-	std::cout << "tam T: " << (asd = CoordTransform::GetRealRyFromImageiPoint(cam, PP1)) << std::endl;
-	std::cout << "tam B: " << (zxc = CoordTransform::GetRealRyFromImageiPoint(cam, PP2)) << std::endl;
+	std::cout << "tam T: " <<
+		(asd = CoordTransform::GetRealRyFromImageiPoint(cam, PP1)) << std::endl;
+	std::cout << "tam B: " <<
+		(zxc = CoordTransform::GetRealRyFromImageiPoint(cam, PP2)) << std::endl;
 	std::cout << "vassoura tem: " << asd - zxc << std::endl;
 	PP1.y = 134; //poste grande top
 	PP2.y = 263; //poste grande bottom
-	std::cout << "tam T: " << (asd = CoordTransform::GetRealRyFromImageiPoint(cam, PP1)) << std::endl;
-	std::cout << "tam B: " << (zxc = CoordTransform::GetRealRyFromImageiPoint(cam, PP2)) << std::endl;
+	std::cout << "tam T: " <<
+		(asd = CoordTransform::GetRealRyFromImageiPoint(cam, PP1)) << std::endl;
+	std::cout << "tam B: " <<
+		(zxc = CoordTransform::GetRealRyFromImageiPoint(cam, PP2)) << std::endl;
 	std::cout << "poste grande tem: " << asd - zxc << std::endl;
 	std::string fn(".camera.conf");
 	cam.SaveConf(fn);
 }
+
+void tt(void);
 void tt(void)
 {
 	std::string a(".camera.conf");
@@ -271,14 +334,17 @@ void tt(void)
 	Camera cam2(b);
 	cv::Point2f PP1, PP2;
 	float asd, zxc;
-	std::cout << "focal distance " << cam.GetFocalDistance() << "px" << std::endl;
+	std::cout << "focal distance " << cam.GetFocalDistance() << "px" <<
+		std::endl;
 	std::cout << "cam height " << cam.GetHeight() << "m" << std::endl;
 	std::cout << "theta " << cam.GetTheta()*180./PI << "°" << std::endl;
 	std::cout << "Rz " << cam.GetRz() << std::endl;
 	PP1.y = 134; //poste grande top
 	PP2.y = 263; //poste grande bottom
-	std::cout << "tam T: " << (asd = CoordTransform::GetRealRyFromImageiPoint(cam, PP1)) << std::endl;
-	std::cout << "tam B: " << (zxc = CoordTransform::GetRealRyFromImageiPoint(cam, PP2)) << std::endl;
+	std::cout << "tam T: " <<
+		(asd = CoordTransform::GetRealRyFromImageiPoint(cam, PP1)) << std::endl;
+	std::cout << "tam B: " <<
+		(zxc = CoordTransform::GetRealRyFromImageiPoint(cam, PP2)) << std::endl;
 	std::cout << "poste grande tem: " << asd - zxc << std::endl;
 }
 //TESTE !!! fim
@@ -290,29 +356,34 @@ void tt(void)
 int main(int argc, char **argv) {
 
 	static struct option long_options[] = {
-		{ "reg_source", required_argument, NULL, 's'},
-		{ "dev_source", required_argument, NULL, 'D'},
-		{ "record",     required_argument, NULL, 'r'},
-		{ "stream",     required_argument, NULL, 'S'},
-		{ "address",    required_argument, NULL, 'a'},
-		{ "sensor",     required_argument, NULL, 't'},
-		{ "help",       no_argument,       NULL, 'h'},
-		{ 0,        0,                 0,    0}
+		{ "reg_source", required_argument, nullptr, 's'},
+		{ "override", 	required_argument, nullptr, 'O'},
+		{ "dev_source", required_argument, nullptr, 'D'},
+		{ "record",	 required_argument, nullptr, 'r'},
+		{ "stream",	 required_argument, nullptr, 'S'},
+		{ "address",	required_argument, nullptr, 'a'},
+		{ "sensor",	 required_argument, nullptr, 't'},
+		{ "help",	   no_argument,	   nullptr, 'h'},
+		{ nullptr,	  0,				 nullptr,  0}
 	};
 	int opt = 0;
 	int long_index = 0;
 	
-	std::string source_file    = ""; //where data comes from if source is a regular file.
-	int  source_device         = -1; //where data comes from if source is device file.
-	std::string record_file    = ""; //output file.
+	std::string source_file	= ""; //where data comes from if source is a
+									 //regular file.
+	int  source_device		 = -1; //where data comes from if source is
+									 //device file.
+	std::string record_file	= ""; //output file.
 	std::string stream_device  = ""; //device file used to stream data.
-	std::string address        = ""; //address where program is running on.
+	std::string address		= ""; //address where program is running on.
 	std::string sensor_device  = ""; //sensor device file.
+	bool pick_points = false;
 	bool help = false;
 	bool abort = false;
 	int source = UNK_FILE;
 
-	while((opt = getopt_long(argc, argv, "s:r:S:t:a:D:h", long_options, &long_index))
+	while((opt = getopt_long(argc, argv, "s:r:S:t:a:D:hO", long_options,
+							 &long_index))
 			!= -1) {
 		switch(opt) {
 			case 's':
@@ -338,6 +409,9 @@ int main(int argc, char **argv) {
 			case 'h':
 				help = true;
 				break;
+		case 'O':
+				pick_points = true;
+				break;
 			default:
 				return EXIT_FAILURE;
 				break;
@@ -357,8 +431,8 @@ int main(int argc, char **argv) {
 	}
 
 	if(source == (REG_FILE | DEV_FILE)) {
-		std::cout << "You can only have one source. It has to be either a regular file " <<
-			"or a device file, not both." << std::endl;
+		std::cout << "You can only have one source. It has to be either a " <<
+			"regular file or a device file, not both." << std::endl;
 		abort = true;
 	}
 
@@ -383,39 +457,36 @@ int main(int argc, char **argv) {
 	//Check all files forced.
 	if(source == REG_FILE)
 		abort = !test_file(source_file);
-	abort = !test_file(record_file)   || abort;
 	abort = !test_file(stream_device) || abort;
 	abort = !test_file(sensor_device) || abort;
 
 	if(abort)
 		return EXIT_FAILURE;
 
-
-    int fdwr = 0;
-	int ret_code = 0;
-	const char *c = NULL;
-	cv::VideoWriter *output = NULL;
-	VideoOutput *outputDevice = NULL;
-	std::thread *sensorsThread = NULL;
+	const char *c = nullptr;
+	cv::VideoWriter *output = nullptr;
+	VideoOutput *outputDevice = nullptr;
+	std::thread *sensorsThread = nullptr;
 	SensorData sd;
 
-    cv::Mat frame;
-    cv::Mat full;
-    cv::Mat fore;
-    cv::VideoCapture *cap = NULL;
+	cv::Mat frame;
+	cv::Mat full;
+	cv::Mat fore;
+	cv::VideoCapture *cap = nullptr;
 	
 	if(source == REG_FILE)
 		cap = new cv::VideoCapture(source_file);
 	else
 		cap = new cv::VideoCapture(source_device);
 	if(!cap) {
-		std::cout << "Error: could not create a VideoCapture object" << std::endl;
+		std::cout << "Error: could not create a VideoCapture object" <<
+			std::endl;
 		exit(EXIT_FAILURE);
 	}
 
 	if(!stream_device.empty()) {
 		c = stream_device.c_str();
-	    outputDevice = new VideoOutput(c);
+		outputDevice = new VideoOutput(c);
 	}
 
 	if(!sensor_device.empty()) {
@@ -423,47 +494,43 @@ int main(int argc, char **argv) {
 		sensorsThread = StartSensorsThread(c, &sd);
 	}
 
-    ImageProcessor ip;   
-    
-    *cap >> frame;
-    cv::Size frame_size = frame.size();
+	ImageProcessor ip;   
+	
+	*cap >> frame;
+	cv::Size frame_size = frame.size();
 
 	if(!record_file.empty())
-	    output = new cv::VideoWriter(record_file, CV_FOURCC('M', 'P', 'E', 'G'), 30, frame_size);
+	output = new cv::VideoWriter(record_file, CV_FOURCC('M', 'P', 'E', 'G'), 30,
+								 frame_size);
 
-    memset(x_counter, 0, sizeof(x_counter));
-    memset(y_counter, 0, sizeof(y_counter));
-    
-    x[0] = 0                ; y[0] = 0;
-    x[1] = frame_size.width ; y[1] = 0;
-    x[2] = 0                ; y[2] = frame_size.height;
-    x[3] = frame_size.width ; y[3] = frame_size.height;
-   
-    x_crop[0] = 0                 ; y_crop[0] = 0;
-    x_crop[1] = frame_size.width  ; y_crop[1] = frame_size.height;
-    
-    x_interest[0] = 0; y_interest[0] = 0;
-    x_interest[1] = 1; y_interest[1] = 1;
-    
-    //cap >> frame;
-    //cv::imwrite( "tmp/fram0.jpg", frame );
-    
-    int imageNum = 0;
-    
-    cv::imshow(address, frame);    
-    InteractionHandler::Subscribe(address);
-    
-    printf("Selecione Ponto de Contador a Esquerda\n");
-    InteractionHandler::SetAction(InteractionAction::SET_COUNTERS_AREA);
+	memset(x_counter, 0, sizeof(x_counter));
+	memset(y_counter, 0, sizeof(y_counter));
+	
+	if (!pick_points) {
+	LoadConfiguration();
+	}
+	
+	x[1] = x[1] ? x[1] : frame_size.width;
+	y[2] = y[2] ? y[2] : frame_size.height;
+	x[3] = x[3] ? x[3] : frame_size.width;
+	y[3] = y[3] ? y[3] : frame_size.height;
+	x_crop[1] = x_crop[1] ? x_crop[1] : frame_size.width;
+	y_crop[1] = y_crop[1] ? y_crop[1] : frame_size.height;
+	
+	cv::imshow(address, frame);	
+		
+	if (pick_points) {
+		InteractionHandler::Subscribe(address);
+		
+		printf("Selecione Ponto de Contador a Esquerda\n");
+		InteractionHandler::SetAction(InteractionAction::SET_COUNTERS_AREA);
+	}
+	cv::Rect interestArea(x_interest[0], y_interest[0],
+						  x_interest[1] - x_interest[0],
+						  y_interest[1] - y_interest[0]);
+	ObjectTracker ot(30, 50, interestArea);
 
-    cv::Rect interestArea(x_interest[0], y_interest[0], x_interest[1] - x_interest[0], y_interest[1] - y_interest[0]);
-    ObjectTracker ot(30, 50, interestArea);
-
-	initCamera(frame);
-	tt();
-//	exit(1);
-
-    while(1) {
+	while(1) {
 		cv::Point lCounter(x_counter[0], y_counter[0]);
 		cv::Point rCounter(x_counter[1], y_counter[1]);
 
@@ -472,39 +539,46 @@ int main(int argc, char **argv) {
 		cv::Point2f p2(x[2], y[2]);
 		cv::Point2f p3(x[3], y[3]); 
 		
-		cv::Rect cropFrame(x_crop[0], y_crop[0], x_crop[1] - x_crop[0], y_crop[1] - y_crop[0]); 
-		interestArea = cv::Rect(x_interest[0], y_interest[0], x_interest[1] - x_interest[0], y_interest[1] - y_interest[0]);
+		cv::Rect cropFrame(x_crop[0], y_crop[0], x_crop[1] - x_crop[0],
+						   y_crop[1] - y_crop[0]); 
+		interestArea = cv::Rect(x_interest[0], y_interest[0],
+								x_interest[1] - x_interest[0],
+								y_interest[1] - y_interest[0]);
 		ot.SetInterestArea(interestArea);
 		
 		*cap >> frame;
 		if(!record_file.empty())
 			output->write(frame); //Write avi file
+			
 		full = frame.clone();
 		ip.PrepareFrame(frame, cropFrame, p0, p1, p2, p3);
 		fore = ip.AcquireForeground(frame);
-		ip.InsertInterestArea(frame, interestArea);
-		//cv::imshow("Fore", fore);
+		ip.InsertInterestArea(frame, interestArea);		
 		ot.IterateTracker(frame, fore);
 		ot.PrintTotal(full);
 		ot.PrintLeftPartial(full, lCounter);
 		ot.PrintRightPartial(full, rCounter);
-				  
-		cv::imshow(address, frame);
-
-		ProvideOsd(full, sensor_device.empty() ? NULL : &sd, ot);
-
-		ProvidePip(frame, fore, full);
+		
+		ProvideOsd(full, sensor_device.empty()?nullptr : &sd, ot);
+		ProvidePip(frame, full);		  
+		
+		cv::imshow(address, frame);		
 		cv::imshow("Full Frame", full);
+		
 		if(!stream_device.empty())
-			outputDevice->write(frame);
+			outputDevice->write(full);
 
 		if(cv::waitKey(30) == 27)
 			break;
+			
+		if (IsMidnight()) {
+			ot.ZeroCounters();
+		}
 		
-    }
+	}
    
 	if(!sensor_device.empty()) {
-	    sensorsThread->join();
+		sensorsThread->join();
 	}
 
 	delete cap;
@@ -512,5 +586,6 @@ int main(int argc, char **argv) {
 		delete outputDevice;
 	if(output)
 		delete output;
-    return 0;
+	
+	return 0;
 }

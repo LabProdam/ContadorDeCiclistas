@@ -17,7 +17,8 @@ private:
 	unsigned int image_counter = 0;
     
 public:
-	ObjectTracker(unsigned int distanceThreshold, double contour_threshold, cv::Rect interest_area);    
+	ObjectTracker(unsigned int distanceThreshold, double contour_threshold,
+				  cv::Rect interest_area);    
 	void IterateTracker(cv::Mat &frame, cv::Mat &fore);
 	void SetInterestArea(cv::Rect interest_area);
 	void PrintTotal(cv::Mat &frame);
@@ -25,7 +26,8 @@ public:
 	void PrintRightPartial(cv::Mat &frame, cv::Point pt);
 	unsigned int GetTotal();
 	unsigned int GetRightPartial();
-	unsigned int GetLeftPartial();    
+	unsigned int GetLeftPartial();
+	void ZeroCounters();   
 
 private:
 	void CreateNewTracker();    

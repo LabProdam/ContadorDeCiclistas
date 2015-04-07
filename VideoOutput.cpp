@@ -16,16 +16,14 @@ VideoOutput::VideoOutput(const char *outputDevice) {
 	sprintf(this->outputDevice, "%s", outputDevice);
 	printf("File: %s", this->outputDevice);
 	
-	if( (this->fdrw = open(this->outputDevice, O_RDWR)) < 0)
-	{
+	if( (this->fdrw = open(this->outputDevice, O_RDWR)) < 0) {
 		perror("The following error occurred");
 		std::cout << std::endl;
 		exit(EXIT_FAILURE);
 	}
 	
 	this->format_properties(&(this->vid_format));
-	if( ioctl(this->fdrw, VIDIOC_S_FMT, &vid_format) < 0)
-	{
+	if( ioctl(this->fdrw, VIDIOC_S_FMT, &vid_format) < 0) {
 		int errno2 = errno;
 		perror("The following error occurred");
 		std::cout << std::endl;
@@ -43,14 +41,22 @@ VideoOutput::~VideoOutput() {
 }
 		
 void VideoOutput::print_format(struct v4l2_format* vid_format) {
-	printf("	vid_format->type                =%d\n",	vid_format->type );
-	printf("	vid_format->fmt.pix.width       =%d\n",	vid_format->fmt.pix.width );
-	printf("	vid_format->fmt.pix.height      =%d\n",	vid_format->fmt.pix.height );
-	printf("	vid_format->fmt.pix.pixelformat =%d\n",	vid_format->fmt.pix.pixelformat);
-	printf("	vid_format->fmt.pix.sizeimage   =%d\n",	vid_format->fmt.pix.sizeimage );
-	printf("	vid_format->fmt.pix.field       =%d\n",	vid_format->fmt.pix.field );
-	printf("	vid_format->fmt.pix.bytesperline=%d\n",	vid_format->fmt.pix.bytesperline );
-	printf("	vid_format->fmt.pix.colorspace  =%d\n",	vid_format->fmt.pix.colorspace );
+	printf("	vid_format->type				=%d\n",
+			vid_format->type );
+	printf("	vid_format->fmt.pix.width	   =%d\n",
+			vid_format->fmt.pix.width );
+	printf("	vid_format->fmt.pix.height	  =%d\n",
+			vid_format->fmt.pix.height );
+	printf("	vid_format->fmt.pix.pixelformat =%d\n",
+			vid_format->fmt.pix.pixelformat);
+	printf("	vid_format->fmt.pix.sizeimage   =%d\n",
+			vid_format->fmt.pix.sizeimage );
+	printf("	vid_format->fmt.pix.field	   =%d\n",
+			vid_format->fmt.pix.field );
+	printf("	vid_format->fmt.pix.bytesperline=%d\n",
+			vid_format->fmt.pix.bytesperline );
+	printf("	vid_format->fmt.pix.colorspace  =%d\n",
+			vid_format->fmt.pix.colorspace );
 }
 
 void VideoOutput::format_properties(struct v4l2_format* vid_format) {
@@ -66,7 +72,7 @@ void VideoOutput::format_properties(struct v4l2_format* vid_format) {
 
 void VideoOutput::write(cv::Mat &frame) {
 	cv::Mat dst;
-	cv::resize(frame, dst, cv::Size(FRAME_WIDTH,FRAME_HEIGHT),0,0,CV_INTER_LINEAR );
+	cv::resize(frame, dst, cv::Size(FRAME_WIDTH, FRAME_HEIGHT), 0, 0,
+			   CV_INTER_LINEAR );
 	::write(this->fdrw, dst.data, FRAME_SIZE);
 }
-

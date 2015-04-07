@@ -7,7 +7,6 @@ ObjectCounter::ObjectCounter(cv::Rect referenceBox) {
 	this->pos = 0;
 	this->totalLeftCount = configuration.GetLeftCounter();
 	this->totalRightCount = configuration.GetRightCounter();
-	this->totalCount = this->totalLeftCount + this->totalRightCount;
 	this->referenceBox = referenceBox;	
 }
 
@@ -21,20 +20,20 @@ bool ObjectCounter::AccountPoint(TrackedObject point) {
 		}
 	}
 	
-//		printf("id: %d, Width: %d, Traj: %f\n", point.id, point.rect.width, fabs(point.pt.x - point.pt0.x) );
+//	printf("id: %d, Width: %d, Traj: %f\n",
+//		   point.id, point.rect.width, fabs(point.pt.x - point.pt0.x) );
 	
 	if (newElement && 
 		point.framesAlive > 2 &&
 		abs(point.pt.x - point.pt0.x) > (1.0 * this->referenceBox.width) &&
-		point.rect.width > (0.7 * this->referenceBox.width) && 				
-		point.rect.width < (1.25 * this->referenceBox.width)) {				
+		point.rect.width > (0.5 * this->referenceBox.width) && 				
+		point.rect.width < (1.50 * this->referenceBox.width)) {				
 		if (point.pt.x > this->referenceBox.tl().x &&
 			point.pt.x < this->referenceBox.br().x &&
 			point.pt.y > this->referenceBox.tl().y &&
 			point.pt.y < this->referenceBox.br().y)
 		{
 			Config configuration;
-			this->totalCount++;
 			
 			if (point.ltr) {
 				this->totalLeftCount++;
@@ -57,7 +56,7 @@ bool ObjectCounter::AccountPoint(TrackedObject point) {
 }
 
 unsigned int ObjectCounter::GetTotalPoints() {
-	return this->totalCount;
+	return this->totalLeftCount + this->totalRightCount;
 }	
 
 unsigned int ObjectCounter::GetLTRPoints() {
@@ -66,6 +65,16 @@ unsigned int ObjectCounter::GetLTRPoints() {
 
 unsigned int ObjectCounter::GetRTLPoints() {
 	return this->totalRightCount;
+}
+
+void ObjectCounter::ZeroCounters() {
+	Config configuration;
+	
+	this->totalLeftCount = 0;
+	this->totalRightCount = 0;
+	
+	configuration.SetLeftCounter(this->totalLeftCount);
+	configuration.SetLeftCounter(this->totalRightCount);
 }
 
 void ObjectCounter::SetReferenceBox(cv::Rect referenceBox) {
