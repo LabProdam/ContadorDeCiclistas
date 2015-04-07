@@ -112,12 +112,12 @@ void ProvideOsd(cv::Mat &frame, SensorData *sd, ObjectTracker &ot) {
 		Print(mesgBuf, cv::Point(frame.size().width-160,
 								 textTop + textVerticalSep), frame);	
 
-		sprintf(mesgBuf, "%d °C", sd->temperature);
+		sprintf(mesgBuf, "%d C", sd->temperature);
 		Print(mesgBuf, cv::Point(frame.size().width-125, textTop), frame, 2);
 
 		sprintf(mesgBuf, "%d", sd->temperature);		
 		sz = cv::getTextSize(mesgBuf, CV_FONT_HERSHEY_PLAIN, 2, 2, nullptr);
-		sprintf(mesgBuf, "?? %d o", sd->temperature);		
+		sprintf(mesgBuf, "o");		
 		Print(mesgBuf, cv::Point(frame.size().width - 127 + sz.width,
 								 textTop - (sz.height) + 2), frame, 1);
 	}
