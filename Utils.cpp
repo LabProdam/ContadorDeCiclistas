@@ -104,11 +104,11 @@ void ProvideOsd(cv::Mat &frame, SensorData *sd, ObjectTracker &ot) {
 		//sprintf(mesgBuf, "CO: %s", sd.co.c_str());
 		//Print(mesgBuf, cv::Point(frame.size().width-170, textTop), frame);
 
-		sprintf(mesgBuf, "Pressao: %d Pa", sd->pressure);
+		sprintf(mesgBuf, "Pressao: %dPa", sd->pressure);
 		Print(mesgBuf, cv::Point(frame.size().width-160,
 								 textTop + textVerticalSep * 2), frame);
 
-		sprintf(mesgBuf, "Umidade: %d", sd->umidity);
+		sprintf(mesgBuf, "Umidade: %d%%", sd->umidity);
 		Print(mesgBuf, cv::Point(frame.size().width-160,
 								 textTop + textVerticalSep), frame);	
 
