@@ -39,7 +39,7 @@ void ObjectTracker::AddRectanglesToTracker(cv::Mat &frame, cv::Mat &fore) {
 }
 
 void ObjectTracker::AddDate(cv::Mat &frame) {
-	time_t time_now = time(0);
+	time_t time_now = time(nullptr);
 	char buff[50];
 	int yPos = 15;
 		

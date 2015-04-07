@@ -129,7 +129,7 @@ void ProvideOsd(cv::Mat &frame, SensorData *sd, ObjectTracker &ot) {
 	Print(mesgBuf, cv::Point(frame.size().width-275,
 							 textTop + textVerticalSep* 2), frame, 2);
 			
-	time_t time_now = time(0);
+	time_t time_now = time(nullptr);
 	char buff[50];		
 		
 	sprintf(buff, "Faria Lima");

@@ -11,6 +11,7 @@ typedef struct {
 	int co;
 }SensorData;
 
+void RetrieveSensorData(const char *device, SensorData *sensorData);
 
 std::thread *StartSensorsThread(const char *device, SensorData *sd);
 #endif
