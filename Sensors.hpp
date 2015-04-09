@@ -5,12 +5,13 @@
 #include <thread>
 
 typedef struct {
-	std::string umidity;
-	std::string temperature;
-	std::string pressure;
-	std::string co;
+	int umidity;
+	int temperature;
+	int pressure;
+	int co;
 }SensorData;
 
+void RetrieveSensorData(const char *device, SensorData *sensorData);
 
 std::thread *StartSensorsThread(const char *device, SensorData *sd);
 #endif

@@ -41,7 +41,8 @@ int Camera::GetFrameCols(void) {
 	return this->frameCols;
 }
 
-void Camera::SetFocalDistance(float d, float h, cv::Point2f P1, cv::Point2f P2) {
+void Camera::SetFocalDistance(float d, float h, cv::Point2f P1,
+							  cv::Point2f P2) {
 	this->focalDistance = d * norm(P1 - P2) / h; //point - point is a vector
 }
 float Camera::GetFocalDistance(void) {
@@ -74,8 +75,10 @@ void Camera::SetTheta(float l, cv::Point2f P1, cv::Point2f P2, float h) {
 	for(i = 0, error = DBL_MAX;
 			(error > 10e-10) && (fabs(theta) <= PI / 2.) &&	(i < 1000);
 			i++) {
-		error2  = (fd*cos(theta) + P1.y*sin(theta)) / (fd*sin(theta) - P1.y*cos(theta)) ;
-		error2 -= (fd*cos(theta) + P2.y*sin(theta)) / (fd*sin(theta) - P2.y*cos(theta));
+		error2  = (fd*cos(theta) + P1.y*sin(theta)) /
+				  (fd*sin(theta) - P1.y*cos(theta));
+		error2 -= (fd*cos(theta) + P2.y*sin(theta)) /
+				  (fd*sin(theta) - P2.y*cos(theta));
 		error2  = fabs(error2);
 		error2  = fabs(k - error2);
 //		std::cout << "theta = " << theta*180./PI << "\ti = " << i <<
@@ -128,7 +131,7 @@ void Camera::SaveConf(std::string confFileName) {
 	if(!confFile.is_open()) {
 		std::cout << "Could not save camera configuration file: " <<
 			confFileName<< std::endl;
-		return;
+		exit(EXIT_FAILURE);
 	}
 	confFile <<
 		this->frameRows << std::endl <<

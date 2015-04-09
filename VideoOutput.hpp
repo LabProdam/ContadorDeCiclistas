@@ -9,14 +9,14 @@
 
 class VideoOutput {
 private:
-		int fdrw;
-		char *outputDevice;		
-		struct v4l2_format vid_format;
+	int fdrw;
+	char *outputDevice;		
+	struct v4l2_format vid_format;
 public:
-		VideoOutput(const char *outputevice);
-		~VideoOutput();
+	VideoOutput(const char *outputevice);
+	~VideoOutput();
 		
-		void print_format(struct v4l2_format* vid_format);
-		void format_properties(struct v4l2_format* vid_format);		
-		void write(cv::Mat &frame);
+	void print_format(struct v4l2_format* vid_format);
+	void format_properties(struct v4l2_format* vid_format);		
+	void write(cv::Mat &frame);
 };

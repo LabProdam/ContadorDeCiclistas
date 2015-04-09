@@ -1,4 +1,5 @@
 #include "TrackedObject.hpp"
+#include "Camera.hpp"
 
 TrackedObject::TrackedObject() {
 	this->id = 0;
@@ -6,7 +7,8 @@ TrackedObject::TrackedObject() {
 	this->framesAlive = 0;
 }
 
-TrackedObject::TrackedObject(cv::Point pt, cv::Rect rectangle, unsigned int id, bool left2right) {
+TrackedObject::TrackedObject(cv::Point pt, cv::Rect rectangle, unsigned int id,
+						 	 bool left2right) {
 	this->pt = pt;
 	this->pt0 = pt;
 	this->rect = rectangle;

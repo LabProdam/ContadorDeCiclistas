@@ -20,7 +20,8 @@ bool ObjectCounter::AccountPoint(TrackedObject point) {
 		}
 	}
 	
-		printf("id: %d, Width: %d, Traj: %f\n", point.id, point.rect.width, fabs(point.pt.x - point.pt0.x) );
+//	printf("id: %d, Width: %d, Traj: %f\n",
+//		   point.id, point.rect.width, fabs(point.pt.x - point.pt0.x) );
 	
 	if (newElement && 
 		point.framesAlive > 2 &&
@@ -30,8 +31,7 @@ bool ObjectCounter::AccountPoint(TrackedObject point) {
 		if (point.pt.x > this->referenceBox.tl().x &&
 			point.pt.x < this->referenceBox.br().x &&
 			point.pt.y > this->referenceBox.tl().y &&
-			point.pt.y < this->referenceBox.br().y)
-		{
+			point.pt.y < this->referenceBox.br().y) {
 			Config configuration;
 			
 			if (point.ltr) {

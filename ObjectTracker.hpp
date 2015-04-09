@@ -9,15 +9,16 @@
 
 class ObjectTracker { 
 private:
-	RectangleTracker *old_tracker = NULL;
-	RectangleTracker *new_tracker = NULL;
-	ObjectLocator *object_locator = NULL;
-	ObjectCounter *object_counter;
+	RectangleTracker *old_tracker = nullptr;
+	RectangleTracker *new_tracker = nullptr;
+	ObjectLocator *object_locator = nullptr;
+	ObjectCounter *object_counter = nullptr;
 	unsigned int distance_threshold;
 	unsigned int image_counter = 0;
     
 public:
-	ObjectTracker(unsigned int distanceThreshold, double contour_threshold, cv::Rect interest_area);    
+	ObjectTracker(unsigned int distanceThreshold, double contour_threshold,
+				  cv::Rect interest_area);    
 	void IterateTracker(cv::Mat &frame, cv::Mat &fore);
 	void SetInterestArea(cv::Rect interest_area);
 	void PrintTotal(cv::Mat &frame);

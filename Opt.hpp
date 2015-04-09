@@ -1,6 +1,6 @@
-#ifndef OPT__HPP
-#define OPT__HPP
+//#ifndef OPT__HPP
+//#define OPT__HPP
 
-#define SENSORS
+//#define SENSORS
 
-#endif
+//#endif
