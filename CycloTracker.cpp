@@ -13,6 +13,7 @@
 #include "ObjectTracker.hpp"
 #include "VideoOutput.hpp"
 #include "Sensors.hpp"
+#include "TrackedObject.hpp"
 
 unsigned int x_counter[2];
 unsigned int y_counter[2];
@@ -141,8 +142,8 @@ protected:
 					CurrentCallbackFunction(x, y);
 					break;
 				default:
-					printf("Error: MouseCallback: event = %d\n", event);
-					exit(EXIT_FAILURE);
+					//printf("Error: MouseCallback: event = %d\n", event);
+					//exit(EXIT_FAILURE);
 					break;
 			}
 		}
@@ -269,9 +270,10 @@ void (*InteractionHandler::CurrentCallbackFunction)(int x, int y) = nullptr;
 #include "CoordTransform.hpp"
 #include "Camera.hpp"
 #define PI (4 * atan(tan(1.)))
+std::string confCam(".camera.conf");
+Camera cam(confCam);
 void initCamera(cv::Mat& f);
 void initCamera(cv::Mat& f) {
-	Camera cam;
 	cam.SetFrameRows(f.rows);
 	cam.SetFrameCols(f.cols);
 	cv::Point2f A, B;
@@ -361,24 +363,25 @@ int main(int argc, char **argv) {
 		{ "reg_source", required_argument, nullptr, 's'},
 		{ "override", 	required_argument, nullptr, 'O'},
 		{ "dev_source", required_argument, nullptr, 'D'},
-		{ "record",	 required_argument, nullptr, 'r'},
-		{ "stream",	 required_argument, nullptr, 'S'},
+		{ "record",	    required_argument, nullptr, 'r'},
+		{ "stream",	    required_argument, nullptr, 'S'},
 		{ "address",	required_argument, nullptr, 'a'},
-		{ "sensor",	 required_argument, nullptr, 't'},
-		{ "help",	   no_argument,	   nullptr, 'h'},
-		{ nullptr,	  0,				 nullptr,  0}
+		{ "sensor",	    required_argument, nullptr, 't'},
+		{ "help",	    no_argument,       nullptr, 'h'},
+		{ nullptr,      0,                 nullptr,  0}
 	};
 	int opt = 0;
 	int long_index = 0;
 	
-	std::string source_file	= ""; //where data comes from if source is a
-									 //regular file.
-	int  source_device		 = -1; //where data comes from if source is
-									 //device file.
-	std::string record_file	= ""; //output file.
-	std::string stream_device  = ""; //device file used to stream data.
-	std::string address		= ""; //address where program is running on.
-	std::string sensor_device  = ""; //sensor device file.
+	std::string source_file	  = ""; //where data comes from if source is a
+								    //regular file.
+	int  source_device	      = -1; //where data comes from if source is
+								    //device file.
+	std::string record_file   = ""; //output file.
+	std::string stream_device = ""; //device file used to stream data.
+	std::string address	      = ""; //address where program is running on.
+	std::string sensor_device = ""; //sensor device file.
+
 	bool pick_points = false;
 	bool help = false;
 	bool abort = false;
@@ -411,7 +414,7 @@ int main(int argc, char **argv) {
 			case 'h':
 				help = true;
 				break;
-		case 'O':
+			case 'O':
 				pick_points = true;
 				break;
 			default:
@@ -439,9 +442,11 @@ int main(int argc, char **argv) {
 	}
 
 	if(source == UNK_FILE) {
-		std::cout << "You must specify where data comes from." << std::endl <<
-			"\tUse --source <source_file>. Or --help to print usage." <<
-			std::endl;
+		std::cout << "You must specify where data comes from. Use either:" <<
+			std::endl <<
+			"\t--source <source_file>." << std::endl <<
+			"\t--dev_source <device number>." << std::endl <<
+			"\tOr --help to print usage." << std::endl;
 		abort = true;
 	}
 
@@ -507,9 +512,11 @@ int main(int argc, char **argv) {
 
 	memset(x_counter, 0, sizeof(x_counter));
 	memset(y_counter, 0, sizeof(y_counter));
-	
+
+	printf("pick points %d\n", pick_points);
+
 	if (!pick_points) {
-	LoadConfiguration();
+		LoadConfiguration();
 	}
 	
 	x[1] = x[1] ? x[1] : frame_size.width;
@@ -527,7 +534,8 @@ int main(int argc, char **argv) {
 		printf("Selecione Ponto de Contador a Esquerda\n");
 		InteractionHandler::SetAction(InteractionAction::SET_COUNTERS_AREA);
 	}
-	cv::Rect interestArea(x_interest[0], y_interest[0],
+	cv::Rect interestArea(x_interest[0],
+						  y_interest[0],
 						  x_interest[1] - x_interest[0],
 						  y_interest[1] - y_interest[0]);
 	ObjectTracker ot(30, 50, interestArea);
@@ -561,7 +569,7 @@ int main(int argc, char **argv) {
 		ot.PrintLeftPartial(full, lCounter);
 		ot.PrintRightPartial(full, rCounter);
 		
-		ProvideOsd(full, sensor_device.empty()?nullptr : &sd, ot);
+		ProvideOsd(full, sensor_device.empty() ? nullptr : &sd, ot);
 		ProvidePip(frame, full);		  
 		
 		cv::imshow(address, frame);		
@@ -576,7 +584,11 @@ int main(int argc, char **argv) {
 		if (IsMidnight()) {
 			ot.ZeroCounters();
 		}
-		
+
+
+
+//		char c;
+//		std::cin >> c;
 	}
    
 	if(!sensor_device.empty()) {

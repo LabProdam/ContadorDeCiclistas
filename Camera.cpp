@@ -131,7 +131,7 @@ void Camera::SaveConf(std::string confFileName) {
 	if(!confFile.is_open()) {
 		std::cout << "Could not save camera configuration file: " <<
 			confFileName<< std::endl;
-		return;
+		exit(EXIT_FAILURE);
 	}
 	confFile <<
 		this->frameRows << std::endl <<

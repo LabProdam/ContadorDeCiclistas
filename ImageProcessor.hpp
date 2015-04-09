@@ -7,6 +7,8 @@
 class ImageProcessor {
 private:
 	cv::BackgroundSubtractorMOG2 bg;
+	cv::Mat lambda; //used to get changes in perspective
+	cv::Mat frame;
 public:
 	ImageProcessor();	
 	~ImageProcessor();	

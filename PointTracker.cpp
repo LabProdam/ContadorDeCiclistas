@@ -28,6 +28,8 @@ PointTracker::PointTracker(unsigned int threshold, PointTracker reference) {
 
 unsigned int PointTracker::absolutePointNumber = 0;
 
+#include "Camera.hpp"
+#include "CoordTransform.hpp"
 void PointTracker::AddPoint(cv::Point &point, cv::Rect &rectangle) {
 	if (this->reference) {
 		for (auto refpt: reference->points) {

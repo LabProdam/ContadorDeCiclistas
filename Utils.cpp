@@ -15,23 +15,18 @@ bool IsMidnight() {
 void print_usage(std::string program_name) {
 	std::cout << program_name << " usage:" << std::endl <<
 		"\t--help   (-h): print this message." << std::endl <<
-		"\t--override (-O): override point picked parameters." <<
-		std::endl <<
+		"\t--override (-O): override point picked parameters." << std::endl <<
 		"\t--reg_source (-s) <file_name>: Specify regular file where data " <<
-			"comes from." <<
-		std::endl <<
+			"comes from." << std::endl <<
 		"\t--dev_source (-D) <number>: Specify device number where data " <<
-			"comes from." <<
-		std::endl <<
-		"\t--record (-r) <file_name>: Record video to filename." <<
-		std::endl <<
-		"\t--stream (-S) <device>: Streams video via device." <<
-		std::endl <<
+			"comes from." << std::endl <<
+		"\t--record (-r) <file_name>: Record video to filename." <<	std::endl <<
+		"\t--stream (-S) <device>: Streams video via device." << std::endl <<
 		"\t--sensor (-t) <device>: Specify device file which is a sensor." <<
-		std::endl <<
+			std::endl <<
 		"\t--address (-a) <address>: address must be present and must be in " <<
 		"in this format: street-number. --address faria_lima-1200." <<
-		std::endl;
+			std::endl;
 	return;
 }
 
@@ -232,4 +227,3 @@ configData Config::LoadData() {
 	}			
 	return data;
 }
-

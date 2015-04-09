@@ -1,7 +1,8 @@
 #ifndef TRACKED_OBJECT__H
 #define TRACKED_OBJECT__H
 
-#include<opencv2/opencv.hpp>
+#include <opencv2/opencv.hpp>
+#include "Camera.hpp"
 
 class TrackedObject {
 public:

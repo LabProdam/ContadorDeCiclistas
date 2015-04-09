@@ -27,28 +27,30 @@ void ProvideOsd(cv::Mat &frame, SensorData *sd, ObjectTracker &ot);
 #include <sys/stat.h>
 #include <unistd.h>
 #include <string.h>
+
 typedef struct {
-		unsigned int left_counter;
-		unsigned int right_counter;
+	unsigned int left_counter;
+	unsigned int right_counter;
 		
-		int x_counter[2];
-		int y_counter[2];
+	int x_counter[2];
+	int y_counter[2];
 
-		int x[4];
-		int y[4];
+	int x[4];
+	int y[4];
 
-		int x_crop[2];
-		int y_crop[2];
+	int x_crop[2];
+	int y_crop[2];
 
-		int x_interest[2];
-		int y_interest[2];
+	int x_interest[2];
+	int y_interest[2];
 		
-}configData;
+} configData;
 
 class Config {
 private:
 	const char *configFile = ".data";
 	configData data;
+
 public:
 	Config();
 	~Config();

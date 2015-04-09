@@ -31,8 +31,7 @@ bool ObjectCounter::AccountPoint(TrackedObject point) {
 		if (point.pt.x > this->referenceBox.tl().x &&
 			point.pt.x < this->referenceBox.br().x &&
 			point.pt.y > this->referenceBox.tl().y &&
-			point.pt.y < this->referenceBox.br().y)
-		{
+			point.pt.y < this->referenceBox.br().y) {
 			Config configuration;
 			
 			if (point.ltr) {

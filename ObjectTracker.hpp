@@ -12,7 +12,7 @@ private:
 	RectangleTracker *old_tracker = nullptr;
 	RectangleTracker *new_tracker = nullptr;
 	ObjectLocator *object_locator = nullptr;
-	ObjectCounter *object_counter;
+	ObjectCounter *object_counter = nullptr;
 	unsigned int distance_threshold;
 	unsigned int image_counter = 0;
     

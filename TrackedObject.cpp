@@ -1,4 +1,5 @@
 #include "TrackedObject.hpp"
+#include "Camera.hpp"
 
 TrackedObject::TrackedObject() {
 	this->id = 0;

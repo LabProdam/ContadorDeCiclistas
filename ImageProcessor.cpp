@@ -1,6 +1,9 @@
 #include"ImageProcessor.hpp"
 
-ImageProcessor::ImageProcessor() {}
+ImageProcessor::ImageProcessor() {
+//	this->lambda = new cv::Mat(2, 4, CV_32FC1);
+//	this->inv_lambda = new cv::Mat(2, 4, CV_32FC1);
+}
 ImageProcessor::~ImageProcessor() {}
 	
 cv::Mat ImageProcessor::AcquireForeground(cv::Mat &frame) {
@@ -68,10 +71,10 @@ void ImageProcessor::PerspectiveTransform(cv::Mat &frame,
 
 
 	// Get the Perspective Transform Matrix i.e. lambda
-	cv::Mat lambda(2, 4, CV_32FC1);
-	lambda = cv::getPerspectiveTransform(inputQuad, outputQuad );
+	this->lambda = cv::getPerspectiveTransform(inputQuad, outputQuad);
 	// Apply the Perspective Transform just found to the src image
-	cv::warpPerspective(frame, frame, lambda, frame.size());
+	cv::warpPerspective(frame, frame, this->lambda, frame.size());
+	this->frame = frame;
 }
 
 void ImageProcessor::CropImage(cv::Mat &frame, cv::Rect cropArea) {
