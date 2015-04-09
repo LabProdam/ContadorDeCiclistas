@@ -1,6 +1,6 @@
 #!/bin/bash
 
-bin/CycloTracker -D 0 --address faria_lima-5125 --record out.avi -S /dev/video1 -t /dev/ttyACM0 > Cyclo.log 2>&1  &
+bin/CycloTracker -D 0 --address faria_lima-2152 --record out.avi -S /dev/video1 -t /dev/ttyACM0 > Cyclo.log 2>&1  &
 
 sleep 5
 
