@@ -17,7 +17,6 @@ OBJ=CycloTracker.o \
 CFLAGS=--std=c++11 \
 	   -Wall \
 	   -Wextra \
-	   -Werror \
 	   -Wpedantic \
 	   -Winit-self \
 	   -Wmissing-braces \
