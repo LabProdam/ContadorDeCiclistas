@@ -71,8 +71,12 @@ void ObjectTracker::AddDate(cv::Mat &frame) {
 }
 
 void ObjectTracker::PersistImage(cv::Mat &frame) {
+	char date[50];
+	time_t time_now = time(nullptr);
+	strftime(date, sizeof(date), "%Y%m%d", localtime(&time_now));
+	
 	char fileName[20];
-	sprintf(fileName, "tmp/bike%d.jpg", this->image_counter++);
+	sprintf(fileName, "tmp/bike%s%d.jpg", date, this->image_counter++);
 	cv::imwrite( fileName, frame );
 }
 

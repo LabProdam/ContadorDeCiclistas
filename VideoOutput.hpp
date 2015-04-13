@@ -1,3 +1,6 @@
+#ifndef VIDEO_OUTPUT_HPP
+#define VIDEO_OUTPUT_HPP
+
 #include <opencv2/opencv.hpp>
 #include <linux/videodev2.h>
 
@@ -20,3 +23,5 @@ public:
 	void format_properties(struct v4l2_format* vid_format);		
 	void write(cv::Mat &frame);
 };
+
+#endif

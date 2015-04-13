@@ -1,5 +1,5 @@
-#ifndef IMAGE_PROCESSOR__H
-#define IMAGE_PROCESSOR__H
+#ifndef IMAGE_PROCESSOR_HPP
+#define IMAGE_PROCESSOR_HPP
 
 #include<opencv2/opencv.hpp>
 #include<iostream>

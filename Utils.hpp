@@ -1,13 +1,10 @@
-#ifndef UTILS__HPP
-#define UTILS__HPP
+#ifndef UTILS_HPP
+#define UTILS_HPP
 
 #include<opencv2/opencv.hpp>
 
-#include "Opt.hpp"
 #include "ObjectTracker.hpp"
-//#ifdef SENSORS
 #include "Sensors.hpp"
-//#endif
 
 #include<time.h>
 

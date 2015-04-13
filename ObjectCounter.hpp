@@ -1,5 +1,5 @@
-#ifndef OBJECT_COUNTER__H
-#define OBJECT_COUNTER__H
+#ifndef OBJECT_COUNTER_HPP
+#define OBJECT_COUNTER_HPP
 
 #include <opencv2/opencv.hpp>
 #include "TrackedObject.hpp"

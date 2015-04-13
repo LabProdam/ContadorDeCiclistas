@@ -7,7 +7,6 @@
 #include<unistd.h>
 #include<fcntl.h>
 
-#include "Opt.hpp"
 #include "Utils.hpp"
 #include "ImageProcessor.hpp"
 #include "ObjectTracker.hpp"
@@ -584,11 +583,6 @@ int main(int argc, char **argv) {
 		if (IsMidnight()) {
 			ot.ZeroCounters();
 		}
-
-
-
-//		char c;
-//		std::cin >> c;
 	}
    
 	if(!sensor_device.empty()) {

@@ -1,5 +1,5 @@
-#ifndef POINT_TRACKER__H
-#define POINT_TRACKER__H
+#ifndef POINT_TRACKER_HPP
+#define POINT_TRACKER_HPP
 
 #include <opencv2/opencv.hpp>
 #include "TrackedObject.hpp"

@@ -1,5 +1,5 @@
-#ifndef TRACKED_OBJECT__H
-#define TRACKED_OBJECT__H
+#ifndef TRACKED_OBJECT_HPP
+#define TRACKED_OBJECT_HPP
 
 #include <opencv2/opencv.hpp>
 #include "Camera.hpp"

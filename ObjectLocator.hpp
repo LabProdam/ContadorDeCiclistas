@@ -1,5 +1,5 @@
-#ifndef OBJECT_LOCATOR__H
-#define OBJECT_LOCATOR__H
+#ifndef OBJECT_LOCATOR_HPP
+#define OBJECT_LOCATOR_HPP
 
 #include<opencv2/opencv.hpp>
 

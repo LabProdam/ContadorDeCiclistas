@@ -1,5 +1,5 @@
-#ifndef COORD_TRANSFORM__H
-#define COORD_TRANSFORM__H
+#ifndef COORD_TRANSFORM_HPP
+#define COORD_TRANSFORM_HPP
 
 #include <opencv2/opencv.hpp>
 #include "Camera.hpp"

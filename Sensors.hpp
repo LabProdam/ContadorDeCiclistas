@@ -1,5 +1,5 @@
-#ifndef SENSORS__HPP
-#define SENSORS__HPP
+#ifndef SENSORS_HPP
+#define SENSORS_HPP
 
 #include <iostream>
 #include <thread>
