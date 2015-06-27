@@ -39,7 +39,8 @@ CFLAGS=--std=c++11 \
 #  https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html
 
 LDFLAGS=-lm \
-	   `pkg-config --libs opencv`
+	   `pkg-config --libs opencv` \
+	   -lpthread
 
 
 all:$(OBJ)
