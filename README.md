@@ -51,3 +51,7 @@ Exemplo:
 
 8) O ponto inferior direito da área de corte (vermelha)
 
+9) O ponto superior esquerdo da área de interesse (preto)
+
+10) o ponto inferior direito da área de interesse (preto)
+
